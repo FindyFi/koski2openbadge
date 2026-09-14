@@ -12,6 +12,74 @@ const DEGREE_ACHIEVEMENT_TYPE = {
   3: 'MasterDegree',
 }
 
+// Text the converter itself generates (descriptions, criteria narratives,
+// result names), as opposed to text picked from the source data. Keyed by
+// output language; selected via the `lang` option to `convert()`.
+const MESSAGES = {
+  en: {
+    gradeName: 'Grade',
+    creditsName: 'Extent (ECTS credits)',
+    courseDescriptionWithContext: (name, programmeContext, institutionName, date) =>
+      `${name}, part of ${programmeContext} at ${institutionName}. Completed ${date}.`,
+    courseDescription: (name, institutionName, date) => `${name}, completed at ${institutionName} on ${date}.`,
+    courseCriteria: (name, institutionName) =>
+      `Awarded upon successful completion of the course "${name}" at ${institutionName}, as recorded in the Finnish national education data registry (Koski).`,
+    degreeDescription: (name, programmeName, institutionName, date) =>
+      `${name}${programmeName ? ` (${programmeName})` : ''}, awarded by ${institutionName} on ${date}.`,
+    degreeCriteria: (programmeOrName, institutionName) =>
+      `Awarded upon successful completion of the ${programmeOrName} degree programme at ${institutionName}, as recorded in the Finnish national education data registry (Koski).`,
+    matriculationExamDescription: (institutionName, date) =>
+      `Finnish Matriculation Examination, confirmed by ${institutionName} on ${date}.`,
+    matriculationExamCriteria: () =>
+      'Awarded upon passing the required tests of the Finnish Matriculation Examination, as recorded by the Matriculation Examination Board (Ylioppilastutkintolautakunta).',
+    matriculationTestDescription: (name, sessionLabel) =>
+      `${name} test of the Finnish Matriculation Examination${sessionLabel ? `, ${sessionLabel}` : ''}.`,
+    matriculationTestCriteria: (name) => `Awarded upon passing the "${name}" test of the Finnish Matriculation Examination.`,
+  },
+  fi: {
+    gradeName: 'Arvosana',
+    creditsName: 'Laajuus (opintopistettä)',
+    courseDescriptionWithContext: (name, programmeContext, institutionName, date) =>
+      `${name}, osa kokonaisuutta ${programmeContext} oppilaitoksessa ${institutionName}. Suoritettu ${date}.`,
+    courseDescription: (name, institutionName, date) => `${name}, suoritettu oppilaitoksessa ${institutionName} ${date}.`,
+    courseCriteria: (name, institutionName) =>
+      `Myönnetty kurssin "${name}" suorittamisesta oppilaitoksessa ${institutionName}, kirjattu Opetushallituksen Koski-tietovarantoon.`,
+    degreeDescription: (name, programmeName, institutionName, date) =>
+      `${name}${programmeName ? ` (${programmeName})` : ''}, myöntänyt ${institutionName} ${date}.`,
+    degreeCriteria: (programmeOrName, institutionName) =>
+      `Myönnetty ${programmeOrName}-tutkinto-ohjelman suorittamisesta oppilaitoksessa ${institutionName}, kirjattu Opetushallituksen Koski-tietovarantoon.`,
+    matriculationExamDescription: (institutionName, date) => `Ylioppilastutkinto, vahvistanut ${institutionName} ${date}.`,
+    matriculationExamCriteria: () =>
+      'Myönnetty ylioppilastutkinnon vaadittujen kokeiden suorittamisesta, Ylioppilastutkintolautakunnan kirjaama.',
+    matriculationTestDescription: (name, sessionLabel) =>
+      `${name}, ylioppilastutkinnon koe${sessionLabel ? `, ${sessionLabel}` : ''}.`,
+    matriculationTestCriteria: (name) => `Myönnetty ylioppilastutkinnon kokeen "${name}" suorittamisesta.`,
+  },
+  sv: {
+    gradeName: 'Vitsord',
+    creditsName: 'Omfattning (studiepoäng)',
+    courseDescriptionWithContext: (name, programmeContext, institutionName, date) =>
+      `${name}, del av ${programmeContext} vid ${institutionName}. Avlagd ${date}.`,
+    courseDescription: (name, institutionName, date) => `${name}, avlagd vid ${institutionName} den ${date}.`,
+    courseCriteria: (name, institutionName) =>
+      `Beviljas för avlagd kurs "${name}" vid ${institutionName}, registrerad i Utbildningsstyrelsens datalager Koski.`,
+    degreeDescription: (name, programmeName, institutionName, date) =>
+      `${name}${programmeName ? ` (${programmeName})` : ''}, utfärdad av ${institutionName} den ${date}.`,
+    degreeCriteria: (programmeOrName, institutionName) =>
+      `Beviljas för avlagd examen ${programmeOrName} vid ${institutionName}, registrerad i Utbildningsstyrelsens datalager Koski.`,
+    matriculationExamDescription: (institutionName, date) => `Studentexamen, fastställd av ${institutionName} den ${date}.`,
+    matriculationExamCriteria: () =>
+      'Beviljas för avlagda obligatoriska prov i studentexamen, registrerad av Studentexamensnämnden.',
+    matriculationTestDescription: (name, sessionLabel) =>
+      `${name}, prov i studentexamen${sessionLabel ? `, ${sessionLabel}` : ''}.`,
+    matriculationTestCriteria: (name) => `Beviljas för godkänt prov "${name}" i studentexamen.`,
+  },
+}
+
+function resolveLang(lang) {
+  return LANGS.includes(lang) ? lang : 'en'
+}
+
 function pickLang(langMap, langs) {
   if (!langMap) return undefined
   for (const lang of langs) {
@@ -73,7 +141,7 @@ function gradeResultSpec(arvosana, pick) {
   return { resultType: 'LetterGrade', value: pick(arvosana.nimi) }
 }
 
-function buildResults(achievementId, { grade, laajuus }) {
+function buildResults(achievementId, { grade, laajuus, t }) {
   const resultDescriptions = []
   const results = []
 
@@ -82,7 +150,7 @@ function buildResults(achievementId, { grade, laajuus }) {
     resultDescriptions.push({
       id,
       type: ['ResultDescription'],
-      name: 'Grade',
+      name: t.gradeName,
       resultType: grade.resultType,
       allowedValue: grade.allowedValue,
       valueMin: grade.valueMin,
@@ -96,7 +164,7 @@ function buildResults(achievementId, { grade, laajuus }) {
     resultDescriptions.push({
       id,
       type: ['ResultDescription'],
-      name: 'Extent (ECTS credits)',
+      name: t.creditsName,
       resultType: 'RawScore',
       valueMin: '0',
     })
@@ -124,10 +192,11 @@ function buildRecord(
     grade,
     laajuus,
     awardedOn,
+    t,
   }
 ) {
   const achievementId = hashId(idParts)
-  const { resultDescriptions, results } = buildResults(achievementId, { grade, laajuus })
+  const { resultDescriptions, results } = buildResults(achievementId, { grade, laajuus, t })
 
   return compact({
     credentialSubject: {
@@ -163,7 +232,7 @@ function moduleName(km, pick) {
   return pick(km.tunniste?.nimi) ?? pick(km.nimi)
 }
 
-function courseRecord({ subjectId, pick }, osasuoritus, { institution, fieldOfStudy, programmeContext }) {
+function courseRecord({ subjectId, pick, t }, osasuoritus, { institution, fieldOfStudy, programmeContext }) {
   const km = osasuoritus.koulutusmoduuli
   const name = moduleName(km, pick)
   const creatorOrg = osasuoritus.vahvistus?.myöntäjäOrganisaatio ?? osasuoritus.toimipiste ?? institution
@@ -172,8 +241,8 @@ function courseRecord({ subjectId, pick }, osasuoritus, { institution, fieldOfSt
   const accepted = acceptedAssessment(osasuoritus.arviointi)
 
   const description = programmeContext
-    ? `${name}, part of ${programmeContext} at ${institutionName}. Completed ${date}.`
-    : `${name}, completed at ${institutionName} on ${date}.`
+    ? t.courseDescriptionWithContext(name, programmeContext, institutionName, date)
+    : t.courseDescription(name, institutionName, date)
 
   return buildRecord(pick, {
     subjectId,
@@ -181,17 +250,18 @@ function courseRecord({ subjectId, pick }, osasuoritus, { institution, fieldOfSt
     achievementType: 'Course',
     name,
     description,
-    criteriaNarrative: `Awarded upon successful completion of the course "${name}" at ${institutionName}, as recorded in the Finnish national education data registry (Koski).`,
+    criteriaNarrative: t.courseCriteria(name, institutionName),
     creatorOrg,
     fieldOfStudy,
     humanCode: km.tunniste?.koodiarvo,
     grade: gradeResultSpec(accepted?.arvosana, pick),
     laajuus: km.laajuus,
     awardedOn: date,
+    t,
   })
 }
 
-function degreeRecord({ subjectId, pick }, suoritus, opiskeluoikeus) {
+function degreeRecord({ subjectId, pick, t }, suoritus, opiskeluoikeus) {
   const km = suoritus.koulutusmoduuli
   const name = pick(km.tunniste?.nimi)
   const programmeName = pick(km.virtaNimi)
@@ -206,16 +276,17 @@ function degreeRecord({ subjectId, pick }, suoritus, opiskeluoikeus) {
     idParts: [opiskeluoikeus.lähdejärjestelmänId?.id, km.tunniste?.koodiarvo, date],
     achievementType,
     name,
-    description: `${name}${programmeName ? ` (${programmeName})` : ''}, awarded by ${institutionName} on ${date}.`,
-    criteriaNarrative: `Awarded upon successful completion of the ${programmeName ?? name} degree programme at ${institutionName}, as recorded in the Finnish national education data registry (Koski).`,
+    description: t.degreeDescription(name, programmeName, institutionName, date),
+    criteriaNarrative: t.degreeCriteria(programmeName ?? name, institutionName),
     creatorOrg: institution,
     fieldOfStudy: programmeName,
     grade: gradeResultSpec(acceptedAssessment(suoritus.arviointi)?.arvosana, pick),
     awardedOn: date,
+    t,
   })
 }
 
-function matriculationExamRecord({ subjectId, pick }, suoritus, opiskeluoikeus) {
+function matriculationExamRecord({ subjectId, pick, t }, suoritus, opiskeluoikeus) {
   const institution = suoritus.vahvistus?.myöntäjäOrganisaatio ?? suoritus.toimipiste ?? opiskeluoikeus.koulutustoimija
   const institutionName = pick(institution?.nimi)
   const date = suoritus.vahvistus?.päivä
@@ -225,15 +296,15 @@ function matriculationExamRecord({ subjectId, pick }, suoritus, opiskeluoikeus) 
     idParts: ['ylioppilastutkinto', institution?.oid, date],
     achievementType: 'SecondarySchoolDiploma',
     name: pick(suoritus.koulutusmoduuli.tunniste.nimi),
-    description: `Finnish Matriculation Examination, confirmed by ${institutionName} on ${date}.`,
-    criteriaNarrative:
-      'Awarded upon passing the required tests of the Finnish Matriculation Examination, as recorded by the Matriculation Examination Board (Ylioppilastutkintolautakunta).',
+    description: t.matriculationExamDescription(institutionName, date),
+    criteriaNarrative: t.matriculationExamCriteria(),
     creatorOrg: institution,
     awardedOn: date,
+    t,
   })
 }
 
-function matriculationTestRecord({ subjectId, pick }, koe, institution, awardedOn) {
+function matriculationTestRecord({ subjectId, pick, t }, koe, institution, awardedOn) {
   const km = koe.koulutusmoduuli
   const name = pick(km.tunniste.nimi)
   const session = koe.tutkintokerta
@@ -245,14 +316,15 @@ function matriculationTestRecord({ subjectId, pick }, koe, institution, awardedO
     idParts: ['yo-koe', km.tunniste.koodiarvo, session?.koodiarvo],
     achievementType: 'Assessment',
     name,
-    description: `${name} test of the Finnish Matriculation Examination${sessionLabel ? `, ${sessionLabel}` : ''}.`,
-    criteriaNarrative: `Awarded upon passing the "${name}" test of the Finnish Matriculation Examination.`,
+    description: t.matriculationTestDescription(name, sessionLabel),
+    criteriaNarrative: t.matriculationTestCriteria(name),
     creatorOrg: institution,
     humanCode: km.tunniste.koodiarvo,
     grade: gradeResultSpec(accepted?.arvosana, pick),
     // Individual exam tests have no vahvistus of their own; fall back to the
     // confirmation date of the enclosing matriculation exam record.
     awardedOn,
+    t,
   })
 }
 
@@ -266,13 +338,16 @@ function matriculationTestRecord({ subjectId, pick }, koe, institution, awardedO
  * @param {object} data - a Koski/Opintopolku study record export.
  * @param {object} [options]
  * @param {string} [options.lang] - preferred output language (e.g. "fi", "sv",
- *   "en"); falls back through the other available languages per field. Call
- *   `convert` once per language if multiple language versions are needed.
+ *   "en"); falls back through the other available languages per field, and
+ *   also selects the language of text the converter itself generates
+ *   (descriptions, criteria narratives, result names), defaulting to "en".
+ *   Call `convert` once per language if multiple language versions are needed.
  */
 export function convert(data, { lang } = {}) {
   const langs = lang ? [lang, ...LANGS.filter((l) => l !== lang)] : LANGS
   const pick = (langMap) => pickLang(langMap, langs)
-  const ctx = { subjectId: `urn:oid:${data.henkilö.oid}`, pick }
+  const t = MESSAGES[resolveLang(lang)]
+  const ctx = { subjectId: `urn:oid:${data.henkilö.oid}`, pick, t }
   const out = []
 
   for (const opiskeluoikeus of data.opiskeluoikeudet ?? []) {
