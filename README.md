@@ -6,22 +6,28 @@ achievement data.
 
 ## Install
 
+The package is not published to npm; depend on it straight from GitHub:
+
 ```sh
-npm install
+npm install github:FindyFi/koski2openbadge
 ```
 
-The package has no runtime dependencies; it only uses Node's built-in `node:crypto`.
+`package.json` sets `"private": true` on purpose, so that a stray `npm publish` cannot claim the
+`koski2openbadge` name on the public registry by accident. It does not affect the GitHub or `file:`
+install above. Remove the field deliberately if the package is ever meant to be published.
+
+It has no runtime dependencies; it only uses Node's built-in `node:crypto`. Node 20 or newer is required.
 
 ## Usage
 
 ```js
-import { convert } from './index.js'
-import data from './opintopolku.json' with { type: 'json' }
+import { convert } from 'koski2openbadge'
+import data from './my-koski-export.json' with { type: 'json' }
 
 const records = convert(data, { lang: 'fi' })
 ```
 
-`opintopolku.json` in this repo is a sample Koski export you can use to try the converter out.
+`test/fixtures/koski-sample.json` is a small synthetic Koski export you can use to try the converter out.
 
 ### `convert(data, options?)`
 
@@ -45,6 +51,14 @@ Options:
   per field if the preferred one is missing, and also selects the language of text the converter itself generates
   (descriptions, criteria narratives, result names). Defaults to `"en"`. Call `convert` once per language if
   multiple language versions are needed.
+
+## Tests
+
+```sh
+npm test
+```
+
+The suite is plain `node --test` with no dependencies, so a fresh clone needs nothing more than Node 20+.
 
 ## License
 
