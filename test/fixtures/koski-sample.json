@@ -1,0 +1,197 @@
+{
+  "henkilö": {
+    "oid": "1.2.246.562.24.00000000001",
+    "etunimet": "Testi Tapaus",
+    "sukunimi": "Opiskelija"
+  },
+  "opiskeluoikeudet": [
+    {
+      "tyyppi": { "koodiarvo": "korkeakoulutus" },
+      "lähdejärjestelmänId": { "id": "hy-oo-1234" },
+      "oppilaitos": {
+        "oid": "1.2.246.562.10.39218317368",
+        "nimi": {
+          "fi": "Helsingin yliopisto",
+          "sv": "Helsingfors universitet",
+          "en": "University of Helsinki"
+        }
+      },
+      "lisätiedot": {
+        "virtaOpiskeluoikeudenTyyppi": { "koodiarvo": "1" }
+      },
+      "suoritukset": [
+        {
+          "tyyppi": { "koodiarvo": "korkeakoulututkinto" },
+          "koulutusmoduuli": {
+            "tunniste": {
+              "koodiarvo": "655301",
+              "nimi": {
+                "fi": "Luonnontieteiden kandidaatti",
+                "sv": "Kandidat i naturvetenskaper",
+                "en": "Bachelor of Science"
+              }
+            },
+            "virtaNimi": {
+              "fi": "Tietojenkäsittelytiede",
+              "sv": "Datavetenskap",
+              "en": "Computer Science"
+            }
+          },
+          "vahvistus": {
+            "päivä": "2021-06-01",
+            "myöntäjäOrganisaatio": {
+              "oid": "1.2.246.562.10.39218317368",
+              "nimi": {
+                "fi": "Helsingin yliopisto",
+                "sv": "Helsingfors universitet",
+                "en": "University of Helsinki"
+              }
+            }
+          },
+          "osasuoritukset": [
+            {
+              "koulutusmoduuli": {
+                "tunniste": {
+                  "koodiarvo": "TKT10001",
+                  "nimi": {
+                    "fi": "Johdatus tietojenkäsittelytieteeseen",
+                    "sv": "Introduktion till datavetenskap",
+                    "en": "Introduction to Computer Science"
+                  }
+                },
+                "laajuus": { "arvo": 5 }
+              },
+              "arviointi": [{ "hyväksytty": true, "arvosana": { "koodiarvo": "4" } }],
+              "vahvistus": { "päivä": "2019-09-15" },
+              "toimipiste": {
+                "oid": "1.2.246.562.10.39218317368",
+                "nimi": {
+                  "fi": "Helsingin yliopisto",
+                  "sv": "Helsingfors universitet",
+                  "en": "University of Helsinki"
+                }
+              }
+            },
+            {
+              "koulutusmoduuli": {
+                "tunniste": {
+                  "koodiarvo": "TKT20002",
+                  "nimi": {
+                    "fi": "Keskeytynyt kurssi",
+                    "en": "Abandoned course"
+                  }
+                },
+                "laajuus": { "arvo": 5 }
+              },
+              "arviointi": [{ "hyväksytty": false, "arvosana": { "koodiarvo": "0" } }]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tyyppi": { "koodiarvo": "korkeakoulutus" },
+      "lähdejärjestelmänId": { "id": "avoin-oo-9876" },
+      "oppilaitos": {
+        "oid": "1.2.246.562.10.88888888888",
+        "nimi": {
+          "fi": "Avoin yliopisto",
+          "sv": "Öppna universitetet",
+          "en": "Open University"
+        }
+      },
+      "suoritukset": [
+        {
+          "tyyppi": { "koodiarvo": "muukorkeakoulunsuoritus" },
+          "koulutusmoduuli": {
+            "tunniste": { "koodiarvo": "MUU", "nimi": { "fi": "Muut opinnot" } }
+          },
+          "osasuoritukset": [
+            {
+              "koulutusmoduuli": {
+                "tunniste": {
+                  "koodiarvo": "AYTKT10002",
+                  "nimi": { "fi": "Ohjelmoinnin perusteet" }
+                },
+                "laajuus": { "arvo": 5 }
+              },
+              "arviointi": [{ "hyväksytty": true, "arvosana": { "koodiarvo": "HYV" } }],
+              "vahvistus": { "päivä": "2020-01-20" }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tyyppi": { "koodiarvo": "ylioppilastutkinto" },
+      "koulutustoimija": {
+        "oid": "1.2.246.562.10.43628088406",
+        "nimi": {
+          "fi": "Ylioppilastutkintolautakunta",
+          "sv": "Studentexamensnämnden",
+          "en": "Matriculation Examination Board"
+        }
+      },
+      "suoritukset": [
+        {
+          "tyyppi": { "koodiarvo": "ylioppilastutkinto" },
+          "koulutusmoduuli": {
+            "tunniste": {
+              "koodiarvo": "ylioppilastutkinto",
+              "nimi": {
+                "fi": "Ylioppilastutkinto",
+                "sv": "Studentexamen",
+                "en": "Matriculation Examination"
+              }
+            }
+          },
+          "vahvistus": {
+            "päivä": "2018-06-02",
+            "myöntäjäOrganisaatio": {
+              "oid": "1.2.246.562.10.43628088406",
+              "nimi": {
+                "fi": "Ylioppilastutkintolautakunta",
+                "sv": "Studentexamensnämnden",
+                "en": "Matriculation Examination Board"
+              }
+            }
+          },
+          "osasuoritukset": [
+            {
+              "koulutusmoduuli": {
+                "tunniste": {
+                  "koodiarvo": "AI",
+                  "nimi": {
+                    "fi": "Äidinkieli, suomi",
+                    "sv": "Modersmål, finska",
+                    "en": "Mother tongue, Finnish"
+                  }
+                }
+              },
+              "tutkintokerta": {
+                "koodiarvo": "2018K",
+                "vuosi": 2018,
+                "vuodenaika": { "fi": "kevät", "sv": "vår", "en": "spring" }
+              },
+              "arviointi": [{ "hyväksytty": true, "arvosana": { "koodiarvo": "M" } }]
+            },
+            {
+              "koulutusmoduuli": {
+                "tunniste": {
+                  "koodiarvo": "BB",
+                  "nimi": { "fi": "Ruotsi, keskipitkä oppimäärä" }
+                }
+              },
+              "tutkintokerta": {
+                "koodiarvo": "2017S",
+                "vuosi": 2017,
+                "vuodenaika": { "fi": "syksy", "en": "autumn" }
+              },
+              "arviointi": [{ "hyväksytty": false, "arvosana": { "koodiarvo": "I" } }]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
