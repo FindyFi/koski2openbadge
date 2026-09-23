@@ -212,7 +212,11 @@ function buildRecord(
         fieldOfStudy,
         criteria: { narrative: criteriaNarrative },
         creator: orgProfile(creatorOrg, pick),
-        resultDescriptions: resultDescriptions.length ? resultDescriptions : undefined,
+        // Singular: Open Badges 3.0 names this `resultDescription` and declares
+        // it "@container": "@set", so it already takes the array. The plural
+        // spelling is not a term in the context, which means a signing service
+        // running jsonld in safe mode rejects the whole credential.
+        resultDescription: resultDescriptions.length ? resultDescriptions : undefined,
       },
       result: results.length ? results : undefined,
     },
@@ -342,12 +346,19 @@ function matriculationTestRecord({ subjectId, pick, t }, koe, institution, award
  *   also selects the language of text the converter itself generates
  *   (descriptions, criteria narratives, result names), defaulting to "en".
  *   Call `convert` once per language if multiple language versions are needed.
+ * @returns {Array<{credentialSubject: object, awardedOn: string|undefined}>}
+ * @throws {TypeError} if `data` is not a Koski export with a `henkilö.oid`.
  */
 export function convert(data, { lang } = {}) {
+  const oid = data?.henkilö?.oid
+  if (!oid) {
+    throw new TypeError('convert() expects a Koski study record export with a `henkilö.oid`.')
+  }
+
   const langs = lang ? [lang, ...LANGS.filter((l) => l !== lang)] : LANGS
   const pick = (langMap) => pickLang(langMap, langs)
   const t = MESSAGES[resolveLang(lang)]
-  const ctx = { subjectId: `urn:oid:${data.henkilö.oid}`, pick, t }
+  const ctx = { subjectId: `urn:oid:${oid}`, pick, t }
   const out = []
 
   for (const opiskeluoikeus of data.opiskeluoikeudet ?? []) {
@@ -399,5 +410,3 @@ export function convert(data, { lang } = {}) {
 
   return out
 }
-
-export default { convert }

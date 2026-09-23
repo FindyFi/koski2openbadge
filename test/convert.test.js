@@ -45,6 +45,14 @@ describe('convert', () => {
     assert.deepEqual(convert({ henkilö: { oid: '1.2.3' } }), [])
     assert.deepEqual(convert({ henkilö: { oid: '1.2.3' }, opiskeluoikeudet: [] }), [])
   })
+
+  test('rejects input that is not a Koski export', () => {
+    // Without the guard these fail deep inside the first property access, with
+    // a TypeError that says nothing about what the caller got wrong.
+    for (const bad of [undefined, null, {}, { henkilö: {} }, 'not json']) {
+      assert.throws(() => convert(bad), { name: 'TypeError', message: /henkilö\.oid/ })
+    }
+  })
 })
 
 describe('degrees', () => {
@@ -114,7 +122,7 @@ describe('results', () => {
   test('maps a numeric grade to a 0-5 raw score', () => {
     const record = achievementNamed(convert(fixture(), { lang: 'fi' }), 'Johdatus tietojenkäsittelytieteeseen')
     const { achievement, result } = record.credentialSubject
-    const grade = achievement.resultDescriptions.find((d) => d.id.endsWith('#grade'))
+    const grade = achievement.resultDescription.find((d) => d.id.endsWith('#grade'))
 
     assert.equal(grade.resultType, 'RawScore')
     assert.equal(grade.valueMin, '0')
@@ -125,7 +133,7 @@ describe('results', () => {
   test('maps a pass/fail grade to a completion status', () => {
     const record = achievementNamed(convert(fixture(), { lang: 'fi' }), 'Ohjelmoinnin perusteet')
     const { achievement, result } = record.credentialSubject
-    const grade = achievement.resultDescriptions.find((d) => d.id.endsWith('#grade'))
+    const grade = achievement.resultDescription.find((d) => d.id.endsWith('#grade'))
     const value = result.find((r) => r.resultDescription === grade.id)
 
     assert.equal(grade.resultType, 'Status')
@@ -135,7 +143,7 @@ describe('results', () => {
   test('maps a matriculation grade to a letter grade with its scale', () => {
     const [subjectTest] = byType(convert(fixture(), { lang: 'fi' }), 'Assessment')
     const { achievement, result } = subjectTest.credentialSubject
-    const grade = achievement.resultDescriptions.find((d) => d.id.endsWith('#grade'))
+    const grade = achievement.resultDescription.find((d) => d.id.endsWith('#grade'))
 
     assert.equal(grade.resultType, 'LetterGrade')
     assert.deepEqual(grade.allowedValue, ['I', 'A', 'B', 'C', 'M', 'E', 'L'])
@@ -145,7 +153,7 @@ describe('results', () => {
   test('reports course extent as a credits result', () => {
     const record = achievementNamed(convert(fixture(), { lang: 'fi' }), 'Johdatus tietojenkäsittelytieteeseen')
     const { achievement, result } = record.credentialSubject
-    const credits = achievement.resultDescriptions.find((d) => d.id.endsWith('#credits'))
+    const credits = achievement.resultDescription.find((d) => d.id.endsWith('#credits'))
 
     assert.equal(credits.name, 'Laajuus (opintopistettä)')
     assert.equal(result.find((r) => r.resultDescription === credits.id).value, '5')
@@ -155,7 +163,7 @@ describe('results', () => {
     const [degree] = byType(convert(fixture(), { lang: 'fi' }), 'BachelorDegree')
 
     assert.ok(!('result' in degree.credentialSubject))
-    assert.ok(!('resultDescriptions' in degree.credentialSubject.achievement))
+    assert.ok(!('resultDescription' in degree.credentialSubject.achievement))
   })
 })
 
