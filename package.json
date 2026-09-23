@@ -1,6 +1,6 @@
 {
   "name": "koski2openbadge",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": true,
   "description": "Convert data from Koski (Oma koski) to Open Badge format",
   "homepage": "https://github.com/FindyFi/koski2openbadge#readme",
@@ -15,8 +15,14 @@
   "author": "Samuel Rinnetmäki <samuel@iki.fi>",
   "type": "module",
   "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "prepublishOnly": "node -e \"console.error('koski2openbadge is distributed via GitHub only and must not be published to npm. See the \\'Not on npm\\' section of README.md.'); process.exit(1)\""
   },
   "files": [
     "index.js"
