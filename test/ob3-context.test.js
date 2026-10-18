@@ -32,6 +32,7 @@ const TERMS = {
   ],
   Result: ['achievedLevel', 'resultDescription', 'status', 'value'],
   ResultDescription: ['allowedValue', 'requiredLevel', 'requiredValue', 'resultType', 'rubricCriterionLevel', 'valueMax', 'valueMin'],
+  IdentityObject: ['hashed', 'identityHash', 'identityType', 'salt'],
   Profile: [
     'additionalName', 'address', 'dateOfBirth', 'email', 'familyName', 'familyNamePrefix',
     'givenName', 'honorificPrefix', 'honorificSuffix', 'official', 'otherIdentifier', 'parentOrg',
@@ -65,6 +66,9 @@ describe('Open Badges 3.0 context', () => {
 
       for (const [j, rd] of (achievement.resultDescription ?? []).entries()) {
         assertTermsDefined(rd, 'ResultDescription', `${at}.achievement.resultDescription[${j}]`)
+      }
+      for (const [j, idObj] of (subject.identifier ?? []).entries()) {
+        assertTermsDefined(idObj, 'IdentityObject', `${at}.identifier[${j}]`)
       }
       for (const [j, r] of (subject.result ?? []).entries()) {
         assertTermsDefined(r, 'Result', `${at}.result[${j}]`)

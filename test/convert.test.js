@@ -41,6 +41,56 @@ describe('convert', () => {
     }
   })
 
+  test('names the holder in a plain-text name identifier', () => {
+    for (const record of convert(fixture(), { lang: 'fi' })) {
+      assert.deepEqual(record.credentialSubject.identifier, [
+        { type: 'IdentityObject', hashed: false, identityType: 'name', identityHash: 'Testi Tapaus Opiskelija' },
+      ])
+    }
+  })
+
+  test('prefers the call name to all first names', () => {
+    const data = fixture()
+    data.henkilö.kutsumanimi = 'Tapaus'
+    const [record] = convert(data)
+    assert.equal(record.credentialSubject.identifier[0].identityHash, 'Tapaus Opiskelija')
+  })
+
+  test('builds the name from whatever parts there are', () => {
+    const cases = [
+      [{ etunimet: 'Testi', sukunimi: undefined }, 'Testi'],
+      [{ etunimet: undefined, sukunimi: 'Opiskelija' }, 'Opiskelija'],
+      [{ kutsumanimi: '  ', etunimet: ' Testi  Tapaus ', sukunimi: 'Opiskelija ' }, 'Testi Tapaus Opiskelija'],
+      [{ etunimet: 42, sukunimi: 'Opiskelija' }, 'Opiskelija'],
+    ]
+    for (const [parts, expected] of cases) {
+      const data = fixture()
+      data.henkilö = { oid: data.henkilö.oid, ...parts }
+      const [record] = convert(data)
+      assert.equal(record.credentialSubject.identifier[0].identityHash, expected)
+    }
+  })
+
+  test('leaves the identifier out when there is no name', () => {
+    const data = fixture()
+    data.henkilö = { oid: data.henkilö.oid, etunimet: '', sukunimi: null }
+    for (const record of convert(data)) {
+      assert.ok(!('identifier' in record.credentialSubject))
+      assert.equal(record.credentialSubject.id, 'urn:oid:1.2.246.562.24.00000000001')
+    }
+  })
+
+  test('leaves the subject id out when there is no oid, and relies on the name', () => {
+    const data = fixture()
+    delete data.henkilö.oid
+    const records = convert(data)
+    assert.ok(records.length > 0)
+    for (const record of records) {
+      assert.ok(!('id' in record.credentialSubject))
+      assert.equal(record.credentialSubject.identifier[0].identityHash, 'Testi Tapaus Opiskelija')
+    }
+  })
+
   test('returns an empty array for an export with no study records', () => {
     assert.deepEqual(convert({ henkilö: { oid: '1.2.3' } }), [])
     assert.deepEqual(convert({ henkilö: { oid: '1.2.3' }, opiskeluoikeudet: [] }), [])
@@ -49,7 +99,8 @@ describe('convert', () => {
   test('rejects input that is not a Koski export', () => {
     // Without the guard these fail deep inside the first property access, with
     // a TypeError that says nothing about what the caller got wrong.
-    for (const bad of [undefined, null, {}, { henkilö: {} }, 'not json']) {
+    const nameless = { henkilö: { oid: ' ', etunimet: '', sukunimi: null }, opiskeluoikeudet: [] }
+    for (const bad of [undefined, null, {}, { henkilö: {} }, 'not json', nameless]) {
       assert.throws(() => convert(bad), { name: 'TypeError', message: /henkilö\.oid/ })
     }
   })

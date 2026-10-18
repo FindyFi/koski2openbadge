@@ -100,6 +100,28 @@ function hashId(parts) {
   return `${ID_NS}:${hash}`
 }
 
+function nonEmpty(value) {
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined
+}
+
+// The name the person goes by: the call name (kutsumanimi) if Koski has one,
+// otherwise all first names, then the surname. Any part may be missing; the
+// result is undefined when none is there.
+function holderName(henkilö) {
+  const given = nonEmpty(henkilö?.kutsumanimi) ?? nonEmpty(henkilö?.etunimet)
+  const name = [given, nonEmpty(henkilö?.sukunimi)].filter(Boolean).join(' ')
+  return name.replace(/\s+/g, ' ') || undefined
+}
+
+// An Open Badges 3.0 IdentityObject carrying the name in plain text. The spec
+// recommends hashing where privacy is expected; the name is in plain text on
+// purpose, so that a verifier can compare it with an ID. The credential stays
+// private until the person shares it, and once they do, it is meant to say
+// who they are.
+function nameIdentifier(name) {
+  return { type: 'IdentityObject', hashed: false, identityType: 'name', identityHash: name }
+}
+
 function compact(value) {
   if (Array.isArray(value)) return value.map(compact)
   if (value && typeof value === 'object') {
@@ -181,6 +203,7 @@ function buildRecord(
   pick,
   {
     subjectId,
+    identifier,
     idParts,
     achievementType,
     name,
@@ -202,6 +225,7 @@ function buildRecord(
     credentialSubject: {
       type: ['AchievementSubject'],
       id: subjectId,
+      identifier,
       achievement: {
         id: achievementId,
         type: ['Achievement'],
@@ -236,7 +260,7 @@ function moduleName(km, pick) {
   return pick(km.tunniste?.nimi) ?? pick(km.nimi)
 }
 
-function courseRecord({ subjectId, pick, t }, osasuoritus, { institution, fieldOfStudy, programmeContext }) {
+function courseRecord({ subjectId, identifier, pick, t }, osasuoritus, { institution, fieldOfStudy, programmeContext }) {
   const km = osasuoritus.koulutusmoduuli
   const name = moduleName(km, pick)
   const creatorOrg = osasuoritus.vahvistus?.myöntäjäOrganisaatio ?? osasuoritus.toimipiste ?? institution
@@ -250,6 +274,7 @@ function courseRecord({ subjectId, pick, t }, osasuoritus, { institution, fieldO
 
   return buildRecord(pick, {
     subjectId,
+    identifier,
     idParts: [creatorOrg?.oid ?? canonicalName(creatorOrg?.nimi), km.tunniste?.koodiarvo, date],
     achievementType: 'Course',
     name,
@@ -265,7 +290,7 @@ function courseRecord({ subjectId, pick, t }, osasuoritus, { institution, fieldO
   })
 }
 
-function degreeRecord({ subjectId, pick, t }, suoritus, opiskeluoikeus) {
+function degreeRecord({ subjectId, identifier, pick, t }, suoritus, opiskeluoikeus) {
   const km = suoritus.koulutusmoduuli
   const name = pick(km.tunniste?.nimi)
   const programmeName = pick(km.virtaNimi)
@@ -277,6 +302,7 @@ function degreeRecord({ subjectId, pick, t }, suoritus, opiskeluoikeus) {
 
   return buildRecord(pick, {
     subjectId,
+    identifier,
     idParts: [opiskeluoikeus.lähdejärjestelmänId?.id, km.tunniste?.koodiarvo, date],
     achievementType,
     name,
@@ -290,13 +316,14 @@ function degreeRecord({ subjectId, pick, t }, suoritus, opiskeluoikeus) {
   })
 }
 
-function matriculationExamRecord({ subjectId, pick, t }, suoritus, opiskeluoikeus) {
+function matriculationExamRecord({ subjectId, identifier, pick, t }, suoritus, opiskeluoikeus) {
   const institution = suoritus.vahvistus?.myöntäjäOrganisaatio ?? suoritus.toimipiste ?? opiskeluoikeus.koulutustoimija
   const institutionName = pick(institution?.nimi)
   const date = suoritus.vahvistus?.päivä
 
   return buildRecord(pick, {
     subjectId,
+    identifier,
     idParts: ['ylioppilastutkinto', institution?.oid, date],
     achievementType: 'SecondarySchoolDiploma',
     name: pick(suoritus.koulutusmoduuli.tunniste.nimi),
@@ -308,7 +335,7 @@ function matriculationExamRecord({ subjectId, pick, t }, suoritus, opiskeluoikeu
   })
 }
 
-function matriculationTestRecord({ subjectId, pick, t }, koe, institution, awardedOn) {
+function matriculationTestRecord({ subjectId, identifier, pick, t }, koe, institution, awardedOn) {
   const km = koe.koulutusmoduuli
   const name = pick(km.tunniste.nimi)
   const session = koe.tutkintokerta
@@ -317,6 +344,7 @@ function matriculationTestRecord({ subjectId, pick, t }, koe, institution, award
 
   return buildRecord(pick, {
     subjectId,
+    identifier,
     idParts: ['yo-koe', km.tunniste.koodiarvo, session?.koodiarvo],
     achievementType: 'Assessment',
     name,
@@ -347,18 +375,26 @@ function matriculationTestRecord({ subjectId, pick, t }, koe, institution, award
  *   (descriptions, criteria narratives, result names), defaulting to "en".
  *   Call `convert` once per language if multiple language versions are needed.
  * @returns {Array<{credentialSubject: object, awardedOn: string|undefined}>}
- * @throws {TypeError} if `data` is not a Koski export with a `henkilö.oid`.
+ * @throws {TypeError} if `data` is not a Koski export with a `henkilö.oid` or
+ *   the person's name: without either, a credential would not identify its
+ *   recipient at all.
  */
 export function convert(data, { lang } = {}) {
-  const oid = data?.henkilö?.oid
-  if (!oid) {
-    throw new TypeError('convert() expects a Koski study record export with a `henkilö.oid`.')
+  const oid = nonEmpty(data?.henkilö?.oid)
+  const name = holderName(data?.henkilö)
+  if (!oid && !name) {
+    throw new TypeError('convert() expects a Koski study record export with a `henkilö.oid` or the person\'s name.')
   }
 
   const langs = lang ? [lang, ...LANGS.filter((l) => l !== lang)] : LANGS
   const pick = (langMap) => pickLang(langMap, langs)
   const t = MESSAGES[resolveLang(lang)]
-  const ctx = { subjectId: `urn:oid:${oid}`, pick, t }
+  const ctx = {
+    subjectId: oid ? `urn:oid:${oid}` : undefined,
+    identifier: name ? [nameIdentifier(name)] : undefined,
+    pick,
+    t,
+  }
   const out = []
 
   for (const opiskeluoikeus of data.opiskeluoikeudet ?? []) {

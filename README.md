@@ -40,7 +40,20 @@ Converts a Koski/Opintopolku study record export into an array of `{ credentialS
 - `awardedOn` is a plain ISO date fact, left for the calling issuer component to place wherever its target VC Data
   Model version expects it (e.g. `validFrom` or `issuanceDate`).
 
-Throws a `TypeError` if `data` is not a Koski export with a `henkilö.oid`.
+The subject is identified by `id: urn:oid:<henkilö.oid>` (the learner number, not the henkilötunnus) and by an
+`identifier` carrying the person's name as an Open Badges 3.0 `IdentityObject`:
+
+```json
+{ "type": "IdentityObject", "hashed": false, "identityType": "name", "identityHash": "Testi Opiskelija" }
+```
+
+The name is the call name (`kutsumanimi`), or all first names (`etunimet`) when there is none, followed by the
+surname (`sukunimi`). Open Badges recommends hashing identifiers where privacy is expected; this one is in plain text
+on purpose, so that a verifier can compare it with an ID. Any part may be missing: the name is built from the parts
+there are, the `identifier` is left out when there is no name, and `id` is left out when there is no oid.
+
+Throws a `TypeError` if `data` has neither a `henkilö.oid` nor a name, since the credential would then not identify
+its recipient at all.
 
 The converter itself does not issue or sign credentials — it only produces the achievement data to embed in one.
 
