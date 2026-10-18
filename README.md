@@ -52,6 +52,9 @@ surname (`sukunimi`). Open Badges recommends hashing identifiers where privacy i
 on purpose, so that a verifier can compare it with an ID. Any part may be missing: the name is built from the parts
 there are, the `identifier` is left out when there is no name, and `id` is left out when there is no oid.
 
+`holderName(henkilö)` applies the same rule on its own, for callers that show the name; it returns `undefined` when
+there is none.
+
 Throws a `TypeError` if `data` has neither a `henkilö.oid` nor a name, since the credential would then not identify
 its recipient at all.
 

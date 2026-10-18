@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test, { describe } from 'node:test'
 
-import { convert } from '../index.js'
+import { convert, holderName } from '../index.js'
 
 const sample = JSON.parse(readFileSync(new URL('./fixtures/koski-sample.json', import.meta.url), 'utf8'))
 
@@ -69,6 +69,12 @@ describe('convert', () => {
       const [record] = convert(data)
       assert.equal(record.credentialSubject.identifier[0].identityHash, expected)
     }
+  })
+
+  test('exports the name rule for callers that show the name', () => {
+    assert.equal(holderName({ kutsumanimi: 'Tapaus', etunimet: 'Testi Tapaus', sukunimi: 'Opiskelija' }), 'Tapaus Opiskelija')
+    assert.equal(holderName({}), undefined)
+    assert.equal(holderName(undefined), undefined)
   })
 
   test('leaves the identifier out when there is no name', () => {

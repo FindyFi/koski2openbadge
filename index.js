@@ -107,7 +107,7 @@ function nonEmpty(value) {
 // The name the person goes by: the call name (kutsumanimi) if Koski has one,
 // otherwise all first names, then the surname. Any part may be missing; the
 // result is undefined when none is there.
-function holderName(henkilö) {
+export function holderName(henkilö) {
   const given = nonEmpty(henkilö?.kutsumanimi) ?? nonEmpty(henkilö?.etunimet)
   const name = [given, nonEmpty(henkilö?.sukunimi)].filter(Boolean).join(' ')
   return name.replace(/\s+/g, ' ') || undefined
