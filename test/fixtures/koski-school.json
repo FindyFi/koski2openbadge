@@ -77,9 +77,10 @@
               "arviointi": [
                 {
                   "arvosana": {
-                    "koodiarvo": "8",
+                    "koodiarvo": "5",
+                    "koodistoUri": "arviointiasteikkoyleissivistava",
                     "nimi": {
-                      "fi": "hyvä"
+                      "fi": "välttävä"
                     }
                   },
                   "hyväksytty": true
@@ -113,8 +114,34 @@
                 {
                   "arvosana": {
                     "koodiarvo": "9",
+                    "koodistoUri": "arviointiasteikkoyleissivistava",
                     "nimi": {
                       "fi": "kiitettävä"
+                    }
+                  },
+                  "hyväksytty": true
+                }
+              ]
+            },
+            {
+              "koulutusmoduuli": {
+                "tunniste": {
+                  "koodiarvo": "LI",
+                  "nimi": {
+                    "fi": "Liikunta",
+                    "sv": "Gymnastik",
+                    "en": "Physical education"
+                  }
+                },
+                "pakollinen": false
+              },
+              "arviointi": [
+                {
+                  "arvosana": {
+                    "koodiarvo": "S",
+                    "koodistoUri": "arviointiasteikkoyleissivistava",
+                    "nimi": {
+                      "fi": "Suoritettu"
                     }
                   },
                   "hyväksytty": true
@@ -183,6 +210,7 @@
                 {
                   "arvosana": {
                     "koodiarvo": "8",
+                    "koodistoUri": "arviointiasteikkoyleissivistava",
                     "nimi": {
                       "fi": "hyvä"
                     }
@@ -253,6 +281,7 @@
                 {
                   "arvosana": {
                     "koodiarvo": "9",
+                    "koodistoUri": "arviointiasteikkoyleissivistava",
                     "nimi": {
                       "fi": "kiitettävä"
                     }
@@ -288,6 +317,7 @@
                 {
                   "arvosana": {
                     "koodiarvo": "9",
+                    "koodistoUri": "arviointiasteikkoyleissivistava",
                     "nimi": {
                       "fi": "kiitettävä"
                     }
@@ -347,13 +377,13 @@
                 },
                 "pakollinen": true,
                 "laajuus": {
-                  "arvo": 3,
+                  "arvo": 12,
                   "yksikkö": {
-                    "koodiarvo": "3",
+                    "koodiarvo": "2",
                     "nimi": {
-                      "fi": "vuosiviikkotuntia",
-                      "sv": "årsveckotimmar",
-                      "en": "weekly lessons per year"
+                      "fi": "opintopistettä",
+                      "sv": "studiepoäng",
+                      "en": "ECTS credits"
                     }
                   }
                 }
@@ -362,6 +392,7 @@
                 {
                   "arvosana": {
                     "koodiarvo": "9",
+                    "koodistoUri": "arviointiasteikkoyleissivistava",
                     "nimi": {
                       "fi": "kiitettävä"
                     }

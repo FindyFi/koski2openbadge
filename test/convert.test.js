@@ -212,6 +212,51 @@ describe('results', () => {
     assert.equal(result.find((r) => r.resultDescription === grade.id).value, 'M')
   })
 
+  function gradeOf(record) {
+    const { achievement, result } = record.credentialSubject
+    const description = achievement.resultDescription.find((d) => d.id.endsWith('#grade'))
+    const { value, status } = result.find((r) => r.resultDescription === description.id)
+    return { resultType: description.resultType, valueMin: description.valueMin, valueMax: description.valueMax, value, status }
+  }
+
+  test('maps a school grade to a 4-10 raw score, even a 5', () => {
+    const courses = byType(convert(fixture(school), { lang: 'fi' }), 'Course')
+
+    assert.deepEqual(gradeOf(courses[0]), { resultType: 'RawScore', valueMin: '4', valueMax: '10', value: '5', status: undefined })
+    assert.deepEqual(gradeOf(courses[1]), { resultType: 'RawScore', valueMin: '4', valueMax: '10', value: '9', status: undefined })
+  })
+
+  test('maps a school pass mark to a completion status', () => {
+    const pe = achievementNamed(convert(fixture(school), { lang: 'fi' }), 'Liikunta')
+
+    assert.deepEqual(gradeOf(pe), { resultType: 'Status', valueMin: undefined, valueMax: undefined, value: undefined, status: 'Completed' })
+  })
+
+  test('reads the scale from the grade code set', () => {
+    const grade = (arvosana) => {
+      const data = fixture()
+      data.opiskeluoikeudet[0].suoritukset[0].osasuoritukset[0].arviointi = [{ hyväksytty: true, arvosana }]
+      return gradeOf(achievementNamed(convert(data, { lang: 'fi' }), 'Johdatus tietojenkäsittelytieteeseen'))
+    }
+
+    assert.deepEqual(
+      [
+        grade({ koodiarvo: '5', koodistoUri: 'virtaarvosana' }),
+        grade({ koodiarvo: '3', koodistoUri: 'arviointiasteikkoammatillinen15' }),
+        grade({ koodiarvo: '2', koodistoUri: 'arviointiasteikkoammatillinent1k3' }),
+        grade({ koodiarvo: '7' }),
+      ].map(({ value, valueMin, valueMax }) => [value, valueMin, valueMax]),
+      [
+        ['5', '0', '5'],
+        ['3', '1', '5'],
+        ['2', '1', '3'],
+        ['7', '4', '10'],
+      ]
+    )
+    // A numeric grade on a scale we don't know is shown by its name.
+    assert.deepEqual(grade({ koodiarvo: '3', koodistoUri: 'tuntematon', nimi: { fi: 'hyvä' } }).value, 'hyvä')
+  })
+
   test('reports course extent as a credits result', () => {
     const record = achievementNamed(convert(fixture(), { lang: 'fi' }), 'Johdatus tietojenkäsittelytieteeseen')
     const { achievement, result } = record.credentialSubject
@@ -219,6 +264,21 @@ describe('results', () => {
 
     assert.equal(credits.name, 'Laajuus (opintopistettä)')
     assert.equal(result.find((r) => r.resultDescription === credits.id).value, '5')
+  })
+
+  test('names the unit of the extent as Koski gives it', () => {
+    const extentName = (data, lang, name) =>
+      achievementNamed(convert(data, { lang }), name).credentialSubject.achievement.resultDescription.find((d) =>
+        d.id.endsWith('#credits')
+      ).name
+
+    assert.equal(extentName(fixture(school), 'fi', 'Matematiikka'), 'Laajuus (vuosiviikkotuntia)')
+    assert.equal(extentName(fixture(school), 'en', 'Mathematics'), 'Extent (weekly lessons per year)')
+    assert.equal(extentName(fixture(school), 'sv', 'Matematik'), 'Omfattning (årsveckotimmar)')
+
+    const unitless = fixture()
+    delete unitless.opiskeluoikeudet[0].suoritukset[0].osasuoritukset[0].koulutusmoduuli.laajuus.yksikkö
+    assert.equal(extentName(unitless, 'fi', 'Johdatus tietojenkäsittelytieteeseen'), 'Laajuus')
   })
 
   test('omits results entirely when there is nothing to report', () => {
@@ -302,11 +362,11 @@ describe('school subjects', () => {
 
     assert.deepEqual(
       courses.map((r) => r.awardedOn),
-      ['2023-06-03', '2023-06-03', '2024-06-01', '2024-06-01', '2024-06-01', undefined]
+      ['2023-06-03', '2023-06-03', '2023-06-03', '2024-06-01', '2024-06-01', '2024-06-01', undefined]
     )
     assert.equal(
       courses[0].credentialSubject.achievement.description,
-      'Äidinkieli ja kirjallisuus, suoritettu oppilaitoksessa Esimerkkikoulu 2023-06-03.'
+      'Äidinkieli ja kirjallisuus, osa kokonaisuutta 8. vuosiluokka oppilaitoksessa Esimerkkikoulu. Suoritettu 2023-06-03.'
     )
   })
 
@@ -316,7 +376,30 @@ describe('school subjects', () => {
     assert.equal(unconfirmed.awardedOn, undefined)
     assert.equal(
       unconfirmed.credentialSubject.achievement.description,
-      'Äidinkieli ja kirjallisuus, completed at Example Upper Secondary School.'
+      'Äidinkieli ja kirjallisuus, part of General upper secondary education syllabus at Example Upper Secondary School.'
+    )
+  })
+
+  test('name the grade year or syllabus they belong to', () => {
+    const maths = byType(convert(fixture(school), { lang: 'fi' }), 'Course')
+      .filter((r) => r.credentialSubject.achievement.name === 'Matematiikka')
+      .map((r) => r.credentialSubject.achievement.description)
+
+    assert.deepEqual(maths, [
+      'Matematiikka, osa kokonaisuutta 8. vuosiluokka oppilaitoksessa Esimerkkikoulu. Suoritettu 2023-06-03.',
+      'Matematiikka, osa kokonaisuutta 9. vuosiluokka oppilaitoksessa Esimerkkikoulu. Suoritettu 2024-06-01.',
+      'Matematiikka, osa kokonaisuutta Perusopetus oppilaitoksessa Esimerkkikoulu. Suoritettu 2024-06-01.',
+    ])
+  })
+
+  test('say what was taught when the suoritus has no name', () => {
+    const data = fixture(school)
+    delete data.opiskeluoikeudet[0].suoritukset[0].koulutusmoduuli
+
+    const [first] = byType(convert(data, { lang: 'fi' }), 'Course')
+    assert.equal(
+      first.credentialSubject.achievement.description,
+      'Äidinkieli ja kirjallisuus, suoritettu oppilaitoksessa Esimerkkikoulu 2023-06-03.'
     )
   })
 

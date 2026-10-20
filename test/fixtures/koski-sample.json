@@ -59,7 +59,7 @@
                     "en": "Introduction to Computer Science"
                   }
                 },
-                "laajuus": { "arvo": 5 }
+                "laajuus": { "arvo": 5, "yksikkö": { "koodiarvo": "2", "nimi": { "fi": "opintopistettä", "sv": "studiepoäng", "en": "ECTS credits" } } }
               },
               "arviointi": [{ "hyväksytty": true, "arvosana": { "koodiarvo": "4" } }],
               "vahvistus": { "päivä": "2019-09-15" },
@@ -81,7 +81,7 @@
                     "en": "Abandoned course"
                   }
                 },
-                "laajuus": { "arvo": 5 }
+                "laajuus": { "arvo": 5, "yksikkö": { "koodiarvo": "2", "nimi": { "fi": "opintopistettä", "sv": "studiepoäng", "en": "ECTS credits" } } }
               },
               "arviointi": [{ "hyväksytty": false, "arvosana": { "koodiarvo": "0" } }]
             }
@@ -113,7 +113,7 @@
                   "koodiarvo": "AYTKT10002",
                   "nimi": { "fi": "Ohjelmoinnin perusteet" }
                 },
-                "laajuus": { "arvo": 5 }
+                "laajuus": { "arvo": 5, "yksikkö": { "koodiarvo": "2", "nimi": { "fi": "opintopistettä", "sv": "studiepoäng", "en": "ECTS credits" } } }
               },
               "arviointi": [{ "hyväksytty": true, "arvosana": { "koodiarvo": "HYV" } }],
               "vahvistus": { "päivä": "2020-01-20" }

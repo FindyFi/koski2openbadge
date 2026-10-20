@@ -73,6 +73,13 @@ Recognised study records include:
 - Completed courses and their grades/credits (`koulutusmoduuli` sub-achievements)
 - Completed degrees (bachelor's/master's), mapped to the corresponding Open Badges `achievementType`
 - The Finnish matriculation examination (ylioppilastutkinto) and its individual subject tests
+- Subjects of basic and upper secondary education, described as part of their grade year or syllabus
+
+Grades become Open Badges results on the scale of their Koski code set: basic and upper secondary education
+(`arviointiasteikkoyleissivistava`) 4–10, higher education (`virtaarvosana`) 0–5, vocational 1–5 or 1–3, as a
+`RawScore` with `valueMin`/`valueMax`; the matriculation examination as a `LetterGrade` on I–L; pass marks
+(hyväksytty, suoritettu, osallistunut) as a `Completed` status. A grade without a code set is read as 0–5, or 4–10
+for 6–10. The extent (`laajuus`) is a result named with its unit from Koski, e.g. "Laajuus (vuosiviikkotuntia)".
 
 Options:
 

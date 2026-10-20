@@ -6,6 +6,18 @@ const ID_NS = 'urn:opintopolku2openbadge'
 // Finnish matriculation examination grade scale, worst to best.
 const YO_GRADE_SCALE = ['I', 'A', 'B', 'C', 'M', 'E', 'L']
 
+// Numeric grade scales [min, max], keyed by the arvosana's Koski code set.
+const NUMERIC_GRADE_SCALES = {
+  arviointiasteikkoyleissivistava: [4, 10], // basic and upper secondary education
+  virtaarvosana: [0, 5], // higher education
+  arviointiasteikkoammatillinen15: [1, 5], // vocational
+  arviointiasteikkoammatillinent1k3: [1, 3], // vocational, older
+}
+
+// Pass marks without a grade: hyväksytty (higher education, vocational),
+// suoritettu and osallistunut (basic and upper secondary education).
+const PASS_GRADES = ['HYV', 'Hyväksytty', 'S', 'O']
+
 // Virta study-right type code -> OB3 achievementType for a completed degree.
 const DEGREE_ACHIEVEMENT_TYPE = {
   1: 'BachelorDegree',
@@ -21,7 +33,7 @@ const DEGREE_ACHIEVEMENT_TYPE = {
 const MESSAGES = {
   en: {
     gradeName: 'Grade',
-    creditsName: 'Extent (ECTS credits)',
+    extentName: (unit) => `Extent${clause(' (', unit, ')')}`,
     matriculationExamName: 'Finnish Matriculation Examination',
     courseDescriptionWithContext: (name, programmeContext, institutionName, date) =>
       `${name}, part of ${programmeContext}${clause(' at ', institutionName)}.${clause(' Completed ', date, '.')}`,
@@ -43,7 +55,7 @@ const MESSAGES = {
   },
   fi: {
     gradeName: 'Arvosana',
-    creditsName: 'Laajuus (opintopistettä)',
+    extentName: (unit) => `Laajuus${clause(' (', unit, ')')}`,
     matriculationExamName: 'Ylioppilastutkinto',
     courseDescriptionWithContext: (name, programmeContext, institutionName, date) =>
       `${name}, osa kokonaisuutta ${programmeContext}${clause(' oppilaitoksessa ', institutionName)}.${clause(' Suoritettu ', date, '.')}`,
@@ -69,7 +81,7 @@ const MESSAGES = {
   },
   sv: {
     gradeName: 'Vitsord',
-    creditsName: 'Omfattning (studiepoäng)',
+    extentName: (unit) => `Omfattning${clause(' (', unit, ')')}`,
     matriculationExamName: 'Studentexamen',
     courseDescriptionWithContext: (name, programmeContext, institutionName, date) =>
       `${name}, del av ${programmeContext}${clause(' vid ', institutionName)}.${clause(' Avlagd ', date, '.')}`,
@@ -174,22 +186,32 @@ function acceptedAssessment(arviointi) {
   return items(arviointi).find((a) => a.hyväksytty) ?? null
 }
 
+// The scale a numeric grade is on: from its code set when Koski names one,
+// otherwise guessed from the value (0-5 higher education, 6-10 school).
+function numericScale(arvosana, koodi) {
+  const scale = arvosana.koodistoUri ? NUMERIC_GRADE_SCALES[arvosana.koodistoUri] : /^[6-9]$|^10$/.test(koodi) ? [4, 10] : [0, 5]
+  const value = /^\d+$/.test(koodi) ? Number(koodi) : NaN
+  return scale && value >= scale[0] && value <= scale[1] ? scale : null
+}
+
 function gradeResultSpec(arvosana, pick) {
-  if (!arvosana) return null
-  const koodi = arvosana.koodiarvo
-  if (koodi === 'HYV') {
+  if (!arvosana || typeof arvosana !== 'object') return null
+  const koodi = nonEmpty(arvosana.koodiarvo)
+  if (PASS_GRADES.includes(koodi)) {
     return { resultType: 'Status', status: 'Completed' }
   }
-  if (/^[0-5]$/.test(koodi)) {
-    return { resultType: 'RawScore', value: koodi, valueMin: '0', valueMax: '5' }
+  const scale = numericScale(arvosana, koodi)
+  if (scale) {
+    return { resultType: 'RawScore', value: koodi, valueMin: String(scale[0]), valueMax: String(scale[1]) }
   }
   if (YO_GRADE_SCALE.includes(koodi)) {
     return { resultType: 'LetterGrade', value: koodi, allowedValue: YO_GRADE_SCALE }
   }
-  return { resultType: 'LetterGrade', value: pick(arvosana.nimi) }
+  const name = nonEmpty(pick(arvosana.nimi)) ?? koodi
+  return name ? { resultType: 'LetterGrade', value: name } : null
 }
 
-function buildResults(achievementId, { grade, laajuus, t }) {
+function buildResults(achievementId, { grade, laajuus, pick, t }) {
   const resultDescriptions = []
   const results = []
 
@@ -213,7 +235,7 @@ function buildResults(achievementId, { grade, laajuus, t }) {
     resultDescriptions.push({
       id,
       type: ['ResultDescription'],
-      name: t.creditsName,
+      name: t.extentName(nonEmpty(pick(laajuus.yksikkö?.nimi))),
       resultType: 'RawScore',
       valueMin: '0',
     })
@@ -246,7 +268,7 @@ function buildRecord(
   }
 ) {
   const achievementId = hashId(idParts)
-  const { resultDescriptions, results } = buildResults(achievementId, { grade, laajuus, t })
+  const { resultDescriptions, results } = buildResults(achievementId, { grade, laajuus, pick, t })
 
   return compact({
     credentialSubject: {
@@ -479,11 +501,15 @@ export function convert(data, { lang } = {}) {
           )
         }
       } else {
+        const suoritusName = nonEmpty(pick(suoritus.koulutusmoduuli?.tunniste?.nimi))
         for (const osasuoritus of items(suoritus.osasuoritukset)) {
           if (!isCompleted(osasuoritus)) continue
           out.push(
             courseRecord(ctx, osasuoritus, {
               institution: opiskeluoikeus.oppilaitos,
+              // The grade year or syllabus, so that a subject in grade 8 and
+              // the same subject in the final syllabus read differently.
+              programmeContext: suoritusName,
               parent: suoritus,
             })
           )
