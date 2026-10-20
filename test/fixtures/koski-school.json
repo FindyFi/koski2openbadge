@@ -1,0 +1,378 @@
+{
+  "henkilö": {
+    "oid": "1.2.246.562.24.00000000002",
+    "etunimet": "Koulu Oppilas",
+    "kutsumanimi": "Koulu",
+    "sukunimi": "Esimerkki"
+  },
+  "opiskeluoikeudet": [
+    {
+      "tyyppi": {
+        "koodiarvo": "perusopetus"
+      },
+      "oppilaitos": {
+        "oid": "1.2.246.562.10.00000000002",
+        "nimi": {
+          "fi": "Esimerkkikoulu",
+          "sv": "Exempelskolan",
+          "en": "Example School"
+        }
+      },
+      "suoritukset": [
+        {
+          "koulutusmoduuli": {
+            "tunniste": {
+              "koodiarvo": "8",
+              "nimi": {
+                "fi": "8. vuosiluokka",
+                "sv": "Årskurs 8"
+              }
+            }
+          },
+          "toimipiste": {
+            "oid": "1.2.246.562.10.00000000002",
+            "nimi": {
+              "fi": "Esimerkkikoulu",
+              "sv": "Exempelskolan",
+              "en": "Example School"
+            }
+          },
+          "vahvistus": {
+            "päivä": "2023-06-03",
+            "myöntäjäOrganisaatio": {
+              "oid": "1.2.246.562.10.00000000002",
+              "nimi": {
+                "fi": "Esimerkkikoulu",
+                "sv": "Exempelskolan",
+                "en": "Example School"
+              }
+            }
+          },
+          "tyyppi": {
+            "koodiarvo": "perusopetuksenvuosiluokka"
+          },
+          "osasuoritukset": [
+            {
+              "koulutusmoduuli": {
+                "tunniste": {
+                  "koodiarvo": "AI",
+                  "nimi": {
+                    "fi": "Äidinkieli ja kirjallisuus",
+                    "sv": "Modersmålet och litteratur"
+                  }
+                },
+                "pakollinen": true,
+                "laajuus": {
+                  "arvo": 3,
+                  "yksikkö": {
+                    "koodiarvo": "3",
+                    "nimi": {
+                      "fi": "vuosiviikkotuntia",
+                      "sv": "årsveckotimmar",
+                      "en": "weekly lessons per year"
+                    }
+                  }
+                }
+              },
+              "arviointi": [
+                {
+                  "arvosana": {
+                    "koodiarvo": "8",
+                    "nimi": {
+                      "fi": "hyvä"
+                    }
+                  },
+                  "hyväksytty": true
+                }
+              ]
+            },
+            {
+              "koulutusmoduuli": {
+                "tunniste": {
+                  "koodiarvo": "MA",
+                  "nimi": {
+                    "fi": "Matematiikka",
+                    "sv": "Matematik",
+                    "en": "Mathematics"
+                  }
+                },
+                "pakollinen": true,
+                "laajuus": {
+                  "arvo": 3,
+                  "yksikkö": {
+                    "koodiarvo": "3",
+                    "nimi": {
+                      "fi": "vuosiviikkotuntia",
+                      "sv": "årsveckotimmar",
+                      "en": "weekly lessons per year"
+                    }
+                  }
+                }
+              },
+              "arviointi": [
+                {
+                  "arvosana": {
+                    "koodiarvo": "9",
+                    "nimi": {
+                      "fi": "kiitettävä"
+                    }
+                  },
+                  "hyväksytty": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "koulutusmoduuli": {
+            "tunniste": {
+              "koodiarvo": "9",
+              "nimi": {
+                "fi": "9. vuosiluokka",
+                "sv": "Årskurs 9"
+              }
+            }
+          },
+          "toimipiste": {
+            "oid": "1.2.246.562.10.00000000002",
+            "nimi": {
+              "fi": "Esimerkkikoulu",
+              "sv": "Exempelskolan",
+              "en": "Example School"
+            }
+          },
+          "vahvistus": {
+            "päivä": "2024-06-01",
+            "myöntäjäOrganisaatio": {
+              "oid": "1.2.246.562.10.00000000002",
+              "nimi": {
+                "fi": "Esimerkkikoulu",
+                "sv": "Exempelskolan",
+                "en": "Example School"
+              }
+            }
+          },
+          "tyyppi": {
+            "koodiarvo": "perusopetuksenvuosiluokka"
+          },
+          "osasuoritukset": [
+            {
+              "koulutusmoduuli": {
+                "tunniste": {
+                  "koodiarvo": "MA",
+                  "nimi": {
+                    "fi": "Matematiikka",
+                    "sv": "Matematik",
+                    "en": "Mathematics"
+                  }
+                },
+                "pakollinen": true,
+                "laajuus": {
+                  "arvo": 3,
+                  "yksikkö": {
+                    "koodiarvo": "3",
+                    "nimi": {
+                      "fi": "vuosiviikkotuntia",
+                      "sv": "årsveckotimmar",
+                      "en": "weekly lessons per year"
+                    }
+                  }
+                }
+              },
+              "arviointi": [
+                {
+                  "arvosana": {
+                    "koodiarvo": "8",
+                    "nimi": {
+                      "fi": "hyvä"
+                    }
+                  },
+                  "hyväksytty": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "koulutusmoduuli": {
+            "tunniste": {
+              "koodiarvo": "201101",
+              "nimi": {
+                "fi": "Perusopetus",
+                "sv": "Grundläggande utbildning",
+                "en": "Basic education"
+              }
+            }
+          },
+          "toimipiste": {
+            "oid": "1.2.246.562.10.00000000002",
+            "nimi": {
+              "fi": "Esimerkkikoulu",
+              "sv": "Exempelskolan",
+              "en": "Example School"
+            }
+          },
+          "vahvistus": {
+            "päivä": "2024-06-01",
+            "myöntäjäOrganisaatio": {
+              "oid": "1.2.246.562.10.00000000002",
+              "nimi": {
+                "fi": "Esimerkkikoulu",
+                "sv": "Exempelskolan",
+                "en": "Example School"
+              }
+            }
+          },
+          "tyyppi": {
+            "koodiarvo": "perusopetuksenoppimaara"
+          },
+          "osasuoritukset": [
+            {
+              "koulutusmoduuli": {
+                "tunniste": {
+                  "koodiarvo": "AI",
+                  "nimi": {
+                    "fi": "Äidinkieli ja kirjallisuus",
+                    "sv": "Modersmålet och litteratur"
+                  }
+                },
+                "pakollinen": true,
+                "laajuus": {
+                  "arvo": 3,
+                  "yksikkö": {
+                    "koodiarvo": "3",
+                    "nimi": {
+                      "fi": "vuosiviikkotuntia",
+                      "sv": "årsveckotimmar",
+                      "en": "weekly lessons per year"
+                    }
+                  }
+                }
+              },
+              "arviointi": [
+                {
+                  "arvosana": {
+                    "koodiarvo": "9",
+                    "nimi": {
+                      "fi": "kiitettävä"
+                    }
+                  },
+                  "hyväksytty": true
+                }
+              ]
+            },
+            {
+              "koulutusmoduuli": {
+                "tunniste": {
+                  "koodiarvo": "MA",
+                  "nimi": {
+                    "fi": "Matematiikka",
+                    "sv": "Matematik",
+                    "en": "Mathematics"
+                  }
+                },
+                "pakollinen": true,
+                "laajuus": {
+                  "arvo": 3,
+                  "yksikkö": {
+                    "koodiarvo": "3",
+                    "nimi": {
+                      "fi": "vuosiviikkotuntia",
+                      "sv": "årsveckotimmar",
+                      "en": "weekly lessons per year"
+                    }
+                  }
+                }
+              },
+              "arviointi": [
+                {
+                  "arvosana": {
+                    "koodiarvo": "9",
+                    "nimi": {
+                      "fi": "kiitettävä"
+                    }
+                  },
+                  "hyväksytty": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tyyppi": {
+        "koodiarvo": "lukiokoulutus"
+      },
+      "oppilaitos": {
+        "oid": "1.2.246.562.10.00000000003",
+        "nimi": {
+          "fi": "Esimerkkilukio",
+          "sv": "Exempelgymnasiet",
+          "en": "Example Upper Secondary School"
+        }
+      },
+      "suoritukset": [
+        {
+          "koulutusmoduuli": {
+            "tunniste": {
+              "koodiarvo": "309902",
+              "nimi": {
+                "fi": "Lukion oppimäärä",
+                "sv": "Gymnasiets lärokurs",
+                "en": "General upper secondary education syllabus"
+              }
+            }
+          },
+          "toimipiste": {
+            "oid": "1.2.246.562.10.00000000003",
+            "nimi": {
+              "fi": "Esimerkkilukio",
+              "sv": "Exempelgymnasiet",
+              "en": "Example Upper Secondary School"
+            }
+          },
+          "tyyppi": {
+            "koodiarvo": "lukionoppimaara"
+          },
+          "osasuoritukset": [
+            {
+              "koulutusmoduuli": {
+                "tunniste": {
+                  "koodiarvo": "AI",
+                  "nimi": {
+                    "fi": "Äidinkieli ja kirjallisuus",
+                    "sv": "Modersmålet och litteratur"
+                  }
+                },
+                "pakollinen": true,
+                "laajuus": {
+                  "arvo": 3,
+                  "yksikkö": {
+                    "koodiarvo": "3",
+                    "nimi": {
+                      "fi": "vuosiviikkotuntia",
+                      "sv": "årsveckotimmar",
+                      "en": "weekly lessons per year"
+                    }
+                  }
+                }
+              },
+              "arviointi": [
+                {
+                  "arvosana": {
+                    "koodiarvo": "9",
+                    "nimi": {
+                      "fi": "kiitettävä"
+                    }
+                  },
+                  "hyväksytty": true
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

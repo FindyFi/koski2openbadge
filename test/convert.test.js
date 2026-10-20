@@ -4,12 +4,17 @@ import test, { describe } from 'node:test'
 
 import { convert, holderName } from '../index.js'
 
-const sample = JSON.parse(readFileSync(new URL('./fixtures/koski-sample.json', import.meta.url), 'utf8'))
+const load = (name) => JSON.parse(readFileSync(new URL(`./fixtures/${name}`, import.meta.url), 'utf8'))
+const sample = load('koski-sample.json')
+// Basic and upper secondary education, shaped like a real export: subjects
+// carry no vahvistus of their own, and the upper secondary syllabus is still
+// unconfirmed.
+const school = load('koski-school.json')
 
 // convert() never mutates its input, but each test gets its own copy so a
 // test that tweaks the export to exercise a branch can't leak into another.
-function fixture() {
-  return structuredClone(sample)
+function fixture(source = sample) {
+  return structuredClone(source)
 }
 
 function byType(records, achievementType) {
@@ -289,4 +294,97 @@ describe('organisation profiles', () => {
     const [degree] = byType(convert(data, { lang: 'fi' }), 'BachelorDegree')
     assert.match(degree.credentialSubject.achievement.creator.id, /^urn:opintopolku2openbadge:[0-9a-f]{16}$/)
   })
+})
+
+describe('school subjects', () => {
+  test('take the confirmation date of the enclosing suoritus', () => {
+    const courses = byType(convert(fixture(school), { lang: 'fi' }), 'Course')
+
+    assert.deepEqual(
+      courses.map((r) => r.awardedOn),
+      ['2023-06-03', '2023-06-03', '2024-06-01', '2024-06-01', '2024-06-01', undefined]
+    )
+    assert.equal(
+      courses[0].credentialSubject.achievement.description,
+      'Äidinkieli ja kirjallisuus, suoritettu oppilaitoksessa Esimerkkikoulu 2023-06-03.'
+    )
+  })
+
+  test('leave the date out when no suoritus has one', () => {
+    const unconfirmed = byType(convert(fixture(school), { lang: 'en' }), 'Course').at(-1)
+
+    assert.equal(unconfirmed.awardedOn, undefined)
+    assert.equal(
+      unconfirmed.credentialSubject.achievement.description,
+      'Äidinkieli ja kirjallisuus, completed at Example Upper Secondary School.'
+    )
+  })
+
+  test('stay apart when two suoritukset confirmed on one day hold the same subject', () => {
+    // Mathematics in grade 9 and in the syllabus, both confirmed 2024-06-01.
+    const ids = byType(convert(fixture(school), { lang: 'fi' }), 'Course').map((r) => r.credentialSubject.achievement.id)
+
+    assert.equal(new Set(ids).size, ids.length)
+  })
+
+  test('leave the ids of courses with a date of their own as they were', () => {
+    assert.deepEqual(
+      convert(fixture(), { lang: 'fi' }).map((r) => r.credentialSubject.achievement.id),
+      [
+        'urn:opintopolku2openbadge:11b07ca1a4c8a2ef',
+        'urn:opintopolku2openbadge:be6e5376959a7dd2',
+        'urn:opintopolku2openbadge:ca6d618f0a3e2c70',
+        'urn:opintopolku2openbadge:e77312d1bc60b543',
+        'urn:opintopolku2openbadge:1e62565e79e65aae',
+      ]
+    )
+  })
+})
+
+// Koski may leave out any value. Whatever is missing, convert() must neither
+// throw (other than for a recipient it can't identify) nor write a missing
+// value into the text.
+describe('missing values', () => {
+  const BAD_TEXT = /undefined|null|NaN|\[object |\s{2}|\s[.,)]|\(\)|^\s|\s$/
+
+  // Every path to a value in the export, outermost first.
+  function paths(value, prefix = []) {
+    if (!value || typeof value !== 'object') return []
+    return Object.entries(value).flatMap(([key, child]) => [[...prefix, key], ...paths(child, [...prefix, key])])
+  }
+
+  function without(data, path, replacement) {
+    const copy = structuredClone(data)
+    const parent = path.slice(0, -1).reduce((node, key) => node[key], copy)
+    if (replacement === undefined) delete parent[path.at(-1)]
+    else parent[path.at(-1)] = replacement
+    return copy
+  }
+
+  function badStrings(value, at = '') {
+    if (typeof value === 'string') return BAD_TEXT.test(value) ? [`${at}: ${JSON.stringify(value)}`] : []
+    if (value && typeof value === 'object') return Object.entries(value).flatMap(([k, v]) => badStrings(v, `${at}.${k}`))
+    return []
+  }
+
+  for (const [name, source] of [['higher education and matriculation', sample], ['school', school]]) {
+    test(`never writes a missing value into the text (${name})`, () => {
+      for (const path of paths(source)) {
+        for (const replacement of [undefined, null, '', {}]) {
+          const data = without(source, path, replacement)
+          for (const lang of ['fi', 'en', 'sv']) {
+            let records
+            try {
+              records = convert(data, { lang })
+            } catch (err) {
+              // Only an unidentifiable recipient may throw.
+              assert.equal(path[0], 'henkilö', `${path.join('.')} = ${JSON.stringify(replacement)}: ${err.message}`)
+              continue
+            }
+            assert.deepEqual(badStrings(records), [], `${path.join('.')} = ${JSON.stringify(replacement)}, ${lang}`)
+          }
+        }
+      }
+    })
+  }
 })

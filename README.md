@@ -38,7 +38,15 @@ Converts a Koski/Opintopolku study record export into an array of `{ credentialS
 
 - `credentialSubject` is a spec-shaped Open Badges 3.0 `AchievementSubject`.
 - `awardedOn` is a plain ISO date fact, left for the calling issuer component to place wherever its target VC Data
-  Model version expects it (e.g. `validFrom` or `issuanceDate`).
+  Model version expects it (e.g. `validFrom` or `issuanceDate`). It is the record's own confirmation date
+  (`vahvistus.päivä`), or for a subject or course without one (basic and upper secondary education subjects never
+  have one) the date of the enclosing suoritus. It is left out when neither has a date, e.g. for subjects of a
+  syllabus still in progress.
+
+Koski may leave out any value. The converter never throws on a missing one and never writes one into the text: a
+description or criteria narrative drops the clause (institution, date, programme, examination session) whose value
+is missing, a record whose module has neither a name nor a code is skipped, and a missing matriculation examination
+name falls back to the generic one.
 
 The subject is identified by `id: urn:oid:<henkilö.oid>` (the learner number, not the henkilötunnus) and by an
 `identifier` carrying the person's name as an Open Badges 3.0 `IdentityObject`:
