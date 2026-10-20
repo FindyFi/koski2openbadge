@@ -4,7 +4,9 @@ import test, { describe } from 'node:test'
 
 import { convert } from '../index.js'
 
-const sample = JSON.parse(readFileSync(new URL('./fixtures/koski-sample.json', import.meta.url), 'utf8'))
+const load = (name) => JSON.parse(readFileSync(new URL(`./fixtures/${name}`, import.meta.url), 'utf8'))
+const sample = load('koski-sample.json')
+const enrolment = load('koski-enrolment.json')
 
 // Every property this package emits has to be a term the Open Badges 3.0
 // context actually defines. A property that is not gets silently dropped when
@@ -33,6 +35,7 @@ const TERMS = {
   Result: ['achievedLevel', 'resultDescription', 'status', 'value'],
   ResultDescription: ['allowedValue', 'requiredLevel', 'requiredValue', 'resultType', 'rubricCriterionLevel', 'valueMax', 'valueMin'],
   IdentityObject: ['hashed', 'identityHash', 'identityType', 'salt'],
+  Alignment: ['targetCode', 'targetDescription', 'targetFramework', 'targetName', 'targetType', 'targetUrl'],
   Profile: [
     'additionalName', 'address', 'dateOfBirth', 'email', 'familyName', 'familyNamePrefix',
     'givenName', 'honorificPrefix', 'honorificSuffix', 'official', 'otherIdentifier', 'parentOrg',
@@ -52,8 +55,9 @@ function assertTermsDefined(object, typeName, path) {
 
 describe('Open Badges 3.0 context', () => {
   test('emits only terms the context defines', () => {
-    const records = convert(structuredClone(sample), { lang: 'fi' })
+    const records = [sample, enrolment].flatMap((data) => convert(structuredClone(data), { lang: 'fi', asOf: '2026-10-20T12:00:00Z' }))
     assert.ok(records.length > 0, 'fixture produced no records to check')
+    assert.ok(records.some((r) => r.credentialSubject.achievement.alignment), 'fixture produced no student status to check')
 
     for (const [i, record] of records.entries()) {
       const subject = record.credentialSubject
@@ -63,6 +67,9 @@ describe('Open Badges 3.0 context', () => {
       const { achievement } = subject
       assertTermsDefined(achievement, 'Achievement', `${at}.achievement`)
       if (achievement.creator) assertTermsDefined(achievement.creator, 'Profile', `${at}.achievement.creator`)
+      for (const [j, a] of (achievement.alignment ?? []).entries()) {
+        assertTermsDefined(a, 'Alignment', `${at}.achievement.alignment[${j}]`)
+      }
 
       for (const [j, rd] of (achievement.resultDescription ?? []).entries()) {
         assertTermsDefined(rd, 'ResultDescription', `${at}.achievement.resultDescription[${j}]`)

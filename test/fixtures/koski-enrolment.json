@@ -1,0 +1,99 @@
+{
+  "henkilö": { "oid": "1.2.246.562.24.00000000003", "etunimet": "Testi", "kutsumanimi": "Testi", "sukunimi": "Opiskelija" },
+  "opiskeluoikeudet": [
+    {
+      "oid": "1.2.246.562.15.00000000001",
+      "tyyppi": { "koodiarvo": "lukiokoulutus", "nimi": { "fi": "Lukiokoulutus", "sv": "Gymnasieutbildning", "en": "General upper secondary education" }, "koodistoUri": "opiskeluoikeudentyyppi" },
+      "oppilaitos": { "oid": "1.2.246.562.10.00000000011", "nimi": { "fi": "Esimerkkilukio", "sv": "Exempelgymnasiet", "en": "Example Upper Secondary School" } },
+      "alkamispäivä": "2024-08-08",
+      "arvioituPäättymispäivä": "2027-06-05",
+      "tila": {
+        "opiskeluoikeusjaksot": [
+          { "alku": "2024-08-08", "tila": { "koodiarvo": "lasna", "nimi": { "fi": "Läsnä", "sv": "Närvarande", "en": "Present" }, "koodistoUri": "koskiopiskeluoikeudentila" } }
+        ]
+      },
+      "suoritukset": [
+        {
+          "tyyppi": { "koodiarvo": "lukionoppimaara", "koodistoUri": "suorituksentyyppi" },
+          "koulutusmoduuli": { "tunniste": { "koodiarvo": "309902", "nimi": { "fi": "Lukion oppimäärä", "sv": "Gymnasiets lärokurs", "en": "General upper secondary education syllabus" }, "koodistoUri": "koulutus" } }
+        }
+      ]
+    },
+    {
+      "oid": "1.2.246.562.15.00000000002",
+      "tyyppi": { "koodiarvo": "perusopetus", "nimi": { "fi": "Perusopetus", "sv": "Grundläggande utbildning", "en": "Primary and lower secondary education" }, "koodistoUri": "opiskeluoikeudentyyppi" },
+      "oppilaitos": { "oid": "1.2.246.562.10.00000000012", "nimi": { "fi": "Esimerkkikoulu" } },
+      "alkamispäivä": "2015-08-12",
+      "päättymispäivä": "2021-06-05",
+      "tila": {
+        "opiskeluoikeusjaksot": [
+          { "alku": "2015-08-12", "tila": { "koodiarvo": "lasna", "koodistoUri": "koskiopiskeluoikeudentila" } },
+          { "alku": "2021-06-05", "tila": { "koodiarvo": "eronnut", "koodistoUri": "koskiopiskeluoikeudentila" } }
+        ]
+      },
+      "suoritukset": []
+    },
+    {
+      "lähdejärjestelmänId": { "id": "virta-oo-0001" },
+      "tyyppi": { "koodiarvo": "korkeakoulutus", "nimi": { "fi": "Korkeakoulutus", "sv": "Högskoleutbildning", "en": "Higher education" }, "koodistoUri": "opiskeluoikeudentyyppi" },
+      "oppilaitos": { "oid": "1.2.246.562.10.00000000013", "nimi": { "fi": "Esimerkin ammattikorkeakoulu", "sv": "Exempel yrkeshögskola", "en": "Example University of Applied Sciences" } },
+      "alkamispäivä": "2025-08-25",
+      "tila": {
+        "opiskeluoikeusjaksot": [
+          { "alku": "2025-08-25", "nimi": { "fi": "Tieto- ja viestintätekniikan tutkinto-ohjelma" }, "tila": { "koodiarvo": "1", "nimi": { "fi": "aktiivinen" }, "koodistoUri": "virtaopiskeluoikeudentila" } }
+        ]
+      },
+      "lisätiedot": {
+        "virtaOpiskeluoikeudenTyyppi": { "koodiarvo": "1", "nimi": { "fi": "Ammattikorkeakoulututkinto", "sv": "Yrkeshögskoleexamen", "en": "Bachelor’s degree from a university of applied sciences" }, "koodistoUri": "virtaopiskeluoikeudentyyppi" },
+        "lukukausiIlmoittautuminen": {
+          "ilmoittautumisjaksot": [
+            { "alku": "2026-01-01", "loppu": "2026-07-31", "tila": { "koodiarvo": "1", "nimi": { "fi": "Läsnä" }, "koodistoUri": "virtalukukausiilmtila" } },
+            { "alku": "2026-08-01", "loppu": "2026-12-31", "tila": { "koodiarvo": "1", "nimi": { "fi": "Läsnä" }, "koodistoUri": "virtalukukausiilmtila" } }
+          ]
+        }
+      },
+      "suoritukset": [
+        {
+          "tyyppi": { "koodiarvo": "korkeakoulututkinto", "koodistoUri": "suorituksentyyppi" },
+          "koulutusmoduuli": { "tunniste": { "koodiarvo": "651902", "nimi": { "fi": "Insinööri (AMK)", "en": "Bachelor of Engineering" }, "koodistoUri": "koulutus" } }
+        }
+      ]
+    },
+    {
+      "lähdejärjestelmänId": { "id": "virta-oo-0002" },
+      "tyyppi": { "koodiarvo": "korkeakoulutus", "nimi": { "fi": "Korkeakoulutus" }, "koodistoUri": "opiskeluoikeudentyyppi" },
+      "oppilaitos": { "oid": "1.2.246.562.10.00000000014", "nimi": { "fi": "Esimerkkiyliopisto" } },
+      "alkamispäivä": "2026-09-01",
+      "päättymispäivä": "2026-12-31",
+      "tila": {
+        "opiskeluoikeusjaksot": [
+          { "alku": "2026-09-01", "tila": { "koodiarvo": "1", "koodistoUri": "virtaopiskeluoikeudentila" } }
+        ]
+      },
+      "lisätiedot": {
+        "virtaOpiskeluoikeudenTyyppi": { "koodiarvo": "18", "nimi": { "fi": "Erillisoikeus" }, "koodistoUri": "virtaopiskeluoikeudentyyppi" },
+        "lukukausiIlmoittautuminen": {
+          "ilmoittautumisjaksot": [
+            { "alku": "2026-08-01", "loppu": "2026-12-31", "tila": { "koodiarvo": "4", "nimi": { "fi": "Puuttuu" } } }
+          ]
+        }
+      },
+      "suoritukset": []
+    },
+    {
+      "lähdejärjestelmänId": { "id": "virta-oo-0003" },
+      "tyyppi": { "koodiarvo": "korkeakoulutus", "nimi": { "fi": "Korkeakoulutus" }, "koodistoUri": "opiskeluoikeudentyyppi" },
+      "oppilaitos": { "oid": "1.2.246.562.10.00000000015", "nimi": { "fi": "Toinen ammattikorkeakoulu" } },
+      "alkamispäivä": "2018-02-01",
+      "päättymispäivä": "2018-02-09",
+      "tila": {
+        "opiskeluoikeusjaksot": [
+          { "alku": "2018-02-01", "tila": { "koodiarvo": "1", "koodistoUri": "virtaopiskeluoikeudentila" } },
+          { "alku": "2018-02-10", "tila": { "koodiarvo": "6", "koodistoUri": "virtaopiskeluoikeudentila" } }
+        ]
+      },
+      "lisätiedot": { "virtaOpiskeluoikeudenTyyppi": { "koodiarvo": "13", "nimi": { "fi": "Avoimen opinnot" } } },
+      "suoritukset": []
+    }
+  ]
+}

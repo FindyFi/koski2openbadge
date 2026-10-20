@@ -10,6 +10,8 @@ const sample = load('koski-sample.json')
 // carry no vahvistus of their own, and the upper secondary syllabus is still
 // unconfirmed.
 const school = load('koski-school.json')
+// Study rights enrolled in and not, for the student status (see student-status.test.js).
+const enrolment = load('koski-enrolment.json')
 
 // convert() never mutates its input, but each test gets its own copy so a
 // test that tweaks the export to exercise a branch can't leak into another.
@@ -450,7 +452,12 @@ describe('missing values', () => {
     return []
   }
 
-  for (const [name, source] of [['higher education and matriculation', sample], ['school', school]]) {
+  const sources = [
+    ['higher education and matriculation', sample],
+    ['school', school],
+    ['student status', enrolment],
+  ]
+  for (const [name, source] of sources) {
     test(`never writes a missing value into the text (${name})`, () => {
       for (const path of paths(source)) {
         for (const replacement of [undefined, null, '', {}]) {
@@ -458,7 +465,7 @@ describe('missing values', () => {
           for (const lang of ['fi', 'en', 'sv']) {
             let records
             try {
-              records = convert(data, { lang })
+              records = convert(data, { lang, asOf: '2026-10-20T12:00:00Z' })
             } catch (err) {
               // Only an unidentifiable recipient may throw.
               assert.equal(path[0], 'henkilö', `${path.join('.')} = ${JSON.stringify(replacement)}: ${err.message}`)

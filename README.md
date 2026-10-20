@@ -74,6 +74,7 @@ Recognised study records include:
 - Completed degrees (bachelor's/master's), mapped to the corresponding Open Badges `achievementType`
 - The Finnish matriculation examination (ylioppilastutkinto) and its individual subject tests
 - Subjects of basic and upper secondary education, described as part of their grade year or syllabus
+- A student status for each study right the person is enrolled in (see below)
 
 Grades become Open Badges results on the scale of their Koski code set: basic and upper secondary education
 (`arviointiasteikkoyleissivistava`) 4–10, higher education (`virtaarvosana`) 0–5, vocational 1–5 or 1–3, as a
@@ -87,6 +88,30 @@ Options:
   per field if the preferred one is missing, and also selects the language of text the converter itself generates
   (descriptions, criteria narratives, result names). Defaults to `"en"`. Call `convert` once per language if
   multiple language versions are needed.
+- `asOf` — the moment to judge enrolment at, a `Date` or an ISO string (default now). Its calendar day in Finland
+  is what counts. Throws a `TypeError` if it isn't a date.
+
+### Student status
+
+A study right the person is enrolled in on `asOf` gives one more item, `{ credentialSubject, validUntil }`:
+
+- `achievement.achievementType` is `ext:StudentStatus` (Open Badges 3.0 allows extension values with `ext:`), and the
+  subject's `result` has the status `Enrolled`.
+- The institution is `achievement.creator`. The level is in the name ("Opiskelija: Lukiokoulutus") and, for
+  machines, in `achievement.alignment`: the Koski study-right type (`opiskeluoikeudentyyppi`), in higher
+  education the Virta type (`virtaopiskeluoikeudentyyppi`), and, when the study right has an education code
+  (`koulutus`), Statistics Finland's level of education (`kansallinenkoulutusluokitus2016koulutusastetaso1`: the
+  code's first digit, which follows the ISCED 2011 levels).
+- `activityStartDate` is when the study right started. There is no `awardedOn`: the caller dates the status when
+  it signs it.
+- `validUntil` is an ISO date-time, the end of the last valid day in Finnish time: the earliest of the expected end
+  (`arvioituPäättymispäivä`), the study right's end, and in higher education the end of the current term's
+  registration. A study right without any of these gives no status.
+
+Enrolled means: the study right has started and not ended, and its latest started status period is present
+(`lasna`), or active (`1`) in higher education, where the current term's registration must also be present.
+On leave and temporarily interrupted don't count. Pre-primary and basic education, basic education in the arts
+and examinations never give a status.
 
 ## Development
 

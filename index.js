@@ -24,6 +24,47 @@ const DEGREE_ACHIEVEMENT_TYPE = {
   3: 'MasterDegree',
 }
 
+// Study-right types that never give a student status: pre-primary and basic
+// education (a child's school enrolment is not what a student status is for),
+// basic education in the arts (a hobby), and examinations, which are not
+// studies.
+const NO_STUDENT_STATUS = [
+  'esiopetus',
+  'perusopetus',
+  'aikuistenperusopetus',
+  'ahvenanmaanperusopetus',
+  'perusopetukseenvalmistavaopetus',
+  'perusopetuksenlisaopetus',
+  'taiteenperusopetus',
+  'ylioppilastutkinto',
+  'kielitutkinto',
+]
+
+// The study-right status that means enrolled, per code set: present (Koski's
+// own records) and active (higher education, from Virta). On leave and
+// temporarily interrupted don't count.
+const ENROLLED_STATUS = { koskiopiskeluoikeudentila: 'lasna', virtaopiskeluoikeudentila: '1' }
+// The semester registration that means present (virtalukukausiilmtila).
+const PRESENT_REGISTRATION = '1'
+
+const KOODISTO_URL = 'https://koski.opintopolku.fi/koski/dokumentaatio/koodisto'
+// Statistics Finland's levels of education (classification of education
+// 2016), which follow the ISCED 2011 levels. A `koulutus` code's first digit
+// is its level; 9 (unknown) is left out. Names as in Koski's code set
+// kansallinenkoulutusluokitus2016koulutusastetaso1.
+const EDUCATION_LEVEL_CODES = 'kansallinenkoulutusluokitus2016koulutusastetaso1'
+const EDUCATION_LEVELS = {
+  0: { fi: 'Varhaiskasvatus ja esiopetusaste', sv: 'Småbarnspedagogik och förskolenivå', en: 'Early childhood education' },
+  1: { fi: 'Alempi perusaste', sv: 'Lägre grundnivå', en: 'Primary education' },
+  2: { fi: 'Ylempi perusaste', sv: 'Högre grundnivå', en: 'Lower secondary education' },
+  3: { fi: 'Toinen aste', sv: 'Andra stadiet', en: 'Upper secondary education' },
+  4: { fi: 'Erikoisammattikoulutusaste', sv: 'Specialyrkesutbildningsnivå', en: 'Post-secondary non-tertiary education' },
+  5: { fi: 'Alin korkea-aste', sv: 'Lägsta högre nivå', en: 'Short-cycle tertiary education' },
+  6: { fi: 'Alempi korkeakouluaste', sv: 'Lägre högskolenivå', en: "Bachelor's or equivalent level" },
+  7: { fi: 'Ylempi korkeakouluaste', sv: 'Högre högskolenivå', en: "Master's or equivalent level" },
+  8: { fi: 'Tutkijakoulutusaste', sv: 'Forskarutbildningsnivå', en: 'Doctoral or equivalent level' },
+}
+
 // Text the converter itself generates (descriptions, criteria narratives,
 // result names), as opposed to text picked from the source data. Keyed by
 // output language; selected via the `lang` option to `convert()`. Koski may
@@ -52,6 +93,15 @@ const MESSAGES = {
     matriculationTestDescription: (name, sessionLabel) =>
       `${name} test of the Finnish Matriculation Examination${clause(', ', sessionLabel)}.`,
     matriculationTestCriteria: (name) => `Awarded upon passing the "${name}" test of the Finnish Matriculation Examination.`,
+    studentStatusName: (level) => `Student: ${level}`,
+    studentStatusDescription: (level, institutionName, start, asOf, end) =>
+      `${level}${clause(', ', institutionName)}. Enrolled on ${asOf}, according to the Finnish national education data registry (Koski).${clause(' Studies started on ', start, '.')} Valid until ${end}.`,
+    studentStatusCriteria: () =>
+      'Awarded when the Finnish national education data registry (Koski) has a started right to study whose status is present, and in higher education a registration as present for the current term.',
+    studentStatusResultName: 'Enrolment status',
+    sectorName: 'Koski: type of right to study',
+    virtaTypeName: 'Virta: type of right to study',
+    levelName: 'Statistics Finland: level of education (ISCED 2011 levels)',
   },
   fi: {
     gradeName: 'Arvosana',
@@ -78,6 +128,15 @@ const MESSAGES = {
       'Myönnetty ylioppilastutkinnon vaadittujen kokeiden suorittamisesta, Ylioppilastutkintolautakunnan kirjaama.',
     matriculationTestDescription: (name, sessionLabel) => `${name}, ylioppilastutkinnon koe${clause(', ', sessionLabel)}.`,
     matriculationTestCriteria: (name) => `Myönnetty ylioppilastutkinnon kokeen "${name}" suorittamisesta.`,
+    studentStatusName: (level) => `Opiskelija: ${level}`,
+    studentStatusDescription: (level, institutionName, start, asOf, end) =>
+      `${level}${clause(', ', institutionName)}. Läsnä oleva opiskelija ${asOf} Opetushallituksen Koski-tietovarannon mukaan.${clause(' Opinnot alkaneet ', start, '.')} Voimassa ${end} asti.`,
+    studentStatusCriteria: () =>
+      'Myönnetty, kun Opetushallituksen Koski-tietovarannossa on alkanut opiskeluoikeus, jonka tila on läsnä, ja korkeakoulussa myös lukukausi-ilmoittautuminen läsnä olevaksi.',
+    studentStatusResultName: 'Opiskelutilanne',
+    sectorName: 'Koski: opiskeluoikeuden tyyppi',
+    virtaTypeName: 'Virta: opiskeluoikeuden tyyppi',
+    levelName: 'Tilastokeskus: koulutusaste (ISCED 2011 -tasot)',
   },
   sv: {
     gradeName: 'Vitsord',
@@ -99,6 +158,15 @@ const MESSAGES = {
       'Beviljas för avlagda obligatoriska prov i studentexamen, registrerad av Studentexamensnämnden.',
     matriculationTestDescription: (name, sessionLabel) => `${name}, prov i studentexamen${clause(', ', sessionLabel)}.`,
     matriculationTestCriteria: (name) => `Beviljas för godkänt prov "${name}" i studentexamen.`,
+    studentStatusName: (level) => `Studerande: ${level}`,
+    studentStatusDescription: (level, institutionName, start, asOf, end) =>
+      `${level}${clause(', ', institutionName)}. Närvarande studerande ${asOf} enligt Utbildningsstyrelsens datalager Koski.${clause(' Studierna inleddes ', start, '.')} Giltigt till ${end}.`,
+    studentStatusCriteria: () =>
+      'Beviljas när Utbildningsstyrelsens datalager Koski har en påbörjad studierätt med status närvarande, och vid högskolor också en anmälan som närvarande för den pågående terminen.',
+    studentStatusResultName: 'Studiestatus',
+    sectorName: 'Koski: typ av studierätt',
+    virtaTypeName: 'Virta: typ av studierätt',
+    levelName: 'Statistikcentralen: utbildningsnivå (ISCED 2011-nivåer)',
   },
 }
 
@@ -428,12 +496,125 @@ function matriculationTestRecord({ subjectId, identifier, pick, t }, koe, instit
   })
 }
 
+const DAY = /^\d{4}-\d{2}-\d{2}$/
+
+function day(value) {
+  const text = nonEmpty(value)
+  return text && DAY.test(text) ? text : undefined
+}
+
+// The calendar day in Finland at `date`, as YYYY-MM-DD.
+function finnishDay(date) {
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Helsinki' }).format(date)
+}
+
+// `time` on `day` in Finnish time, as an ISO date-time in UTC.
+function finnishTime(day, time) {
+  const guess = Date.parse(`${day}T${time}Z`)
+  const shown = new Date(guess).toLocaleString('sv-SE', { timeZone: 'Europe/Helsinki' })
+  const offset = Date.parse(`${shown.replace(' ', 'T')}Z`) - guess
+  return new Date(guess - offset).toISOString()
+}
+
+function alignment(framework, code, name, codeSet) {
+  return { type: ['Alignment'], targetFramework: framework, targetCode: code, targetName: name, targetUrl: `${KOODISTO_URL}/${codeSet}/latest` }
+}
+
+// The study right's education code (`koulutus`, six digits), from its first
+// suoritus that has one.
+function educationCode(opiskeluoikeus) {
+  return items(opiskeluoikeus.suoritukset)
+    .map((suoritus) => suoritus.koulutusmoduuli?.tunniste)
+    .find((tunniste) => tunniste?.koodistoUri === 'koulutus' && /^\d{6}$/.test(tunniste.koodiarvo ?? ''))
+}
+
+// A student status when the study right is enrolled on `today` (YYYY-MM-DD):
+// it has started and not ended, its latest started status period is present
+// (active, in higher education), and in higher education today's semester
+// registration is present. Valid until the earliest end Koski gives: the
+// expected end, the study right's end, and in higher education the end of the
+// registration. Without any end it isn't issued.
+function studentStatusRecord({ subjectId, identifier, pick, t }, opiskeluoikeus, today) {
+  const sector = nonEmpty(opiskeluoikeus.tyyppi?.koodiarvo)
+  if (!sector || NO_STUDENT_STATUS.includes(sector)) return null
+  const start = day(opiskeluoikeus.alkamispäivä)
+  const end = day(opiskeluoikeus.päättymispäivä)
+  if ((start && start > today) || (end && end < today)) return null
+
+  const higherEducation = sector === 'korkeakoulutus'
+  const period = items(opiskeluoikeus.tila?.opiskeluoikeusjaksot)
+    .filter((jakso) => day(jakso.alku) && jakso.alku <= today)
+    .sort((a, b) => (a.alku < b.alku ? -1 : a.alku > b.alku ? 1 : 0))
+    .at(-1)
+  const codeSet = period?.tila?.koodistoUri ?? (higherEducation ? 'virtaopiskeluoikeudentila' : 'koskiopiskeluoikeudentila')
+  if (!period || ENROLLED_STATUS[codeSet] !== period.tila?.koodiarvo) return null
+
+  const ends = [day(opiskeluoikeus.arvioituPäättymispäivä), end]
+  if (higherEducation) {
+    const registration = items(opiskeluoikeus.lisätiedot?.lukukausiIlmoittautuminen?.ilmoittautumisjaksot).find(
+      (jakso) => day(jakso.alku) && day(jakso.loppu) && jakso.alku <= today && today <= jakso.loppu
+    )
+    if (registration?.tila?.koodiarvo !== PRESENT_REGISTRATION) return null
+    ends.push(registration.loppu)
+  }
+  const validUntil = ends.filter(Boolean).sort()[0]
+  if (!validUntil || validUntil < today) return null
+
+  const institution = opiskeluoikeus.oppilaitos ?? opiskeluoikeus.koulutustoimija
+  const institutionName = pick(institution?.nimi)
+  const virtaType = higherEducation ? opiskeluoikeus.lisätiedot?.virtaOpiskeluoikeudenTyyppi : undefined
+  const virtaCode = nonEmpty(virtaType?.koodiarvo)
+  const sectorName = nonEmpty(pick(opiskeluoikeus.tyyppi.nimi)) ?? sector
+  const level = nonEmpty(pick(virtaType?.nimi)) ?? sectorName
+  const education = educationCode(opiskeluoikeus)
+  const levelCode = education?.koodiarvo[0]
+  const educationLevel = EDUCATION_LEVELS[levelCode]
+  const achievementId = hashId(['student-status', opiskeluoikeus.oid ?? opiskeluoikeus.lähdejärjestelmänId?.id, institution?.oid, start])
+  const statusId = `${achievementId}#status`
+
+  return compact({
+    credentialSubject: {
+      type: ['AchievementSubject'],
+      id: subjectId,
+      identifier,
+      activityStartDate: start ? finnishTime(start, '00:00:00') : undefined,
+      achievement: {
+        id: achievementId,
+        type: ['Achievement'],
+        achievementType: 'ext:StudentStatus',
+        name: t.studentStatusName(level),
+        description: t.studentStatusDescription(level, institutionName, start, today, validUntil),
+        criteria: { narrative: t.studentStatusCriteria() },
+        creator: orgProfile(institution, pick),
+        fieldOfStudy: nonEmpty(pick(education?.nimi)) ?? nonEmpty(pick(period.nimi)),
+        alignment: [
+          alignment(t.sectorName, sector, sectorName, 'opiskeluoikeudentyyppi'),
+          virtaCode &&
+            alignment(t.virtaTypeName, virtaCode, level, 'virtaopiskeluoikeudentyyppi'),
+          educationLevel && alignment(t.levelName, levelCode, pick(educationLevel), EDUCATION_LEVEL_CODES),
+        ].filter(Boolean),
+        resultDescription: [
+          { id: statusId, type: ['ResultDescription'], name: t.studentStatusResultName, resultType: 'Status' },
+        ],
+      },
+      result: [{ type: ['Result'], resultDescription: statusId, status: 'Enrolled' }],
+    },
+    validUntil: finnishTime(validUntil, '23:59:59'),
+  })
+}
+
 /**
  * Convert a Koski/Opintopolku study record export into an array of
  * `{ credentialSubject, awardedOn }` items. `credentialSubject` is a spec-shaped
  * Open Badges 3.0 AchievementSubject; `awardedOn` is a plain ISO date fact for
  * a calling issuer component to place wherever its target VC Data Model
  * version expects it (e.g. `validFrom` or `issuanceDate`).
+ *
+ * A study right the person is enrolled in on `asOf` also gives a student
+ * status item, `{ credentialSubject, validUntil }`: achievementType
+ * `ext:StudentStatus`, a result with status `Enrolled`, and no `awardedOn`
+ * (the caller dates it when it signs). `validUntil` is an ISO date-time, the
+ * end of the last day it is valid in Finnish time.
  *
  * @param {object} data - a Koski/Opintopolku study record export.
  * @param {object} [options]
@@ -442,17 +623,22 @@ function matriculationTestRecord({ subjectId, identifier, pick, t }, koe, instit
  *   also selects the language of text the converter itself generates
  *   (descriptions, criteria narratives, result names), defaulting to "en".
  *   Call `convert` once per language if multiple language versions are needed.
- * @returns {Array<{credentialSubject: object, awardedOn: string|undefined}>}
+ * @param {Date|string} [options.asOf] - the moment to judge enrolment at
+ *   (default now); its calendar day in Finland is what counts.
+ * @returns {Array<{credentialSubject: object, awardedOn?: string, validUntil?: string}>}
  * @throws {TypeError} if `data` is not a Koski export with a `henkilö.oid` or
  *   the person's name: without either, a credential would not identify its
- *   recipient at all.
+ *   recipient at all. Also if `asOf` is not a date.
  */
-export function convert(data, { lang } = {}) {
+export function convert(data, { lang, asOf = new Date() } = {}) {
   const oid = nonEmpty(data?.henkilö?.oid)
   const name = holderName(data?.henkilö)
   if (!oid && !name) {
     throw new TypeError('convert() expects a Koski study record export with a `henkilö.oid` or the person\'s name.')
   }
+  const asOfDate = new Date(asOf)
+  if (Number.isNaN(asOfDate.getTime())) throw new TypeError('convert() expects `asOf` to be a date.')
+  const today = finnishDay(asOfDate)
 
   const langs = lang ? [lang, ...LANGS.filter((l) => l !== lang)] : LANGS
   const pick = (langMap) => pickLang(langMap, langs)
@@ -466,6 +652,8 @@ export function convert(data, { lang } = {}) {
   const out = []
 
   for (const opiskeluoikeus of items(data.opiskeluoikeudet)) {
+    out.push(studentStatusRecord(ctx, opiskeluoikeus, today))
+
     if (opiskeluoikeus.tyyppi?.koodiarvo === 'ylioppilastutkinto') {
       for (const suoritus of items(opiskeluoikeus.suoritukset)) {
         if (!isCompleted(suoritus)) continue
