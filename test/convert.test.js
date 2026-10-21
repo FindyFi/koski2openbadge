@@ -349,6 +349,16 @@ describe('organisation profiles', () => {
     })
   })
 
+  test('gives the school number as an other identifier when Koski has one', () => {
+    const data = fixture()
+    data.opiskeluoikeudet[0].suoritukset[0].vahvistus.myöntäjäOrganisaatio.oppilaitosnumero = { koodiarvo: '01901' }
+
+    const [degree] = byType(convert(data, { lang: 'fi' }), 'BachelorDegree')
+    assert.deepEqual(degree.credentialSubject.achievement.creator.otherIdentifier, [
+      { type: ['IdentifierEntry'], identifier: '01901', identifierType: 'identifier' },
+    ])
+  })
+
   test('derives a stable id for an organisation with no oid', () => {
     const data = fixture()
     delete data.opiskeluoikeudet[0].suoritukset[0].vahvistus.myöntäjäOrganisaatio.oid

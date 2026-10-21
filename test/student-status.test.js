@@ -46,6 +46,23 @@ describe('student status', () => {
     assert.match(achievement.description, /Enrolled on 2026-10-20/)
   })
 
+  test('gives the school number of the institution as an other identifier', () => {
+    const [school, university] = statuses(fixture())
+    assert.deepEqual(school.credentialSubject.achievement.creator.otherIdentifier, [
+      { type: ['IdentifierEntry'], identifier: '00565', identifierType: 'identifier' },
+    ])
+    assert.equal('otherIdentifier' in university.credentialSubject.achievement.creator, false)
+  })
+
+  test('leaves out the other identifier when the school number is missing or blank', () => {
+    for (const oppilaitosnumero of [undefined, {}, { koodiarvo: '  ' }]) {
+      const data = fixture()
+      upperSecondary(data).oppilaitos.oppilaitosnumero = oppilaitosnumero
+      const [record] = statuses(data)
+      assert.equal('otherIdentifier' in record.credentialSubject.achievement.creator, false)
+    }
+  })
+
   test('aligns to the sector and the level of education', () => {
     const [school, university] = statuses(fixture())
     const codes = (record) => record.credentialSubject.achievement.alignment.map((a) => [a.targetUrl.split('/').at(-2), a.targetCode, a.targetName])

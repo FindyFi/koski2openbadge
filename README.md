@@ -97,7 +97,8 @@ A study right the person is enrolled in on `asOf` gives one more item, `{ creden
 
 - `achievement.achievementType` is `ext:StudentStatus` (Open Badges 3.0 allows extension values with `ext:`), and the
   subject's `result` has the status `Enrolled`.
-- The institution is `achievement.creator`. The level is in the name ("Opiskelija: Lukiokoulutus") and, for
+- The institution is `achievement.creator`, as for every record; when Koski has its Statistics Finland school number
+  (`oppilaitosnumero`), the profile carries it as `otherIdentifier`. The level is in the name ("Opiskelija: Lukiokoulutus") and, for
   machines, in `achievement.alignment`: the Koski study-right type (`opiskeluoikeudentyyppi`), in higher
   education the Virta type (`virtaopiskeluoikeudentyyppi`), and, when the study right has an education code
   (`koulutus`), Statistics Finland's level of education (`kansallinenkoulutusluokitus2016koulutusastetaso1`: the

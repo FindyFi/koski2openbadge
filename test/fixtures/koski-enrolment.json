@@ -4,7 +4,7 @@
     {
       "oid": "1.2.246.562.15.00000000001",
       "tyyppi": { "koodiarvo": "lukiokoulutus", "nimi": { "fi": "Lukiokoulutus", "sv": "Gymnasieutbildning", "en": "General upper secondary education" }, "koodistoUri": "opiskeluoikeudentyyppi" },
-      "oppilaitos": { "oid": "1.2.246.562.10.00000000011", "nimi": { "fi": "Esimerkkilukio", "sv": "Exempelgymnasiet", "en": "Example Upper Secondary School" } },
+      "oppilaitos": { "oid": "1.2.246.562.10.00000000011", "oppilaitosnumero": { "koodiarvo": "00565", "koodistoUri": "oppilaitosnumero", "nimi": { "fi": "Esimerkkilukio" } }, "nimi": { "fi": "Esimerkkilukio", "sv": "Exempelgymnasiet", "en": "Example Upper Secondary School" } },
       "alkamispäivä": "2024-08-08",
       "arvioituPäättymispäivä": "2027-06-05",
       "tila": {

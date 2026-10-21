@@ -36,6 +36,7 @@ const TERMS = {
   ResultDescription: ['allowedValue', 'requiredLevel', 'requiredValue', 'resultType', 'rubricCriterionLevel', 'valueMax', 'valueMin'],
   IdentityObject: ['hashed', 'identityHash', 'identityType', 'salt'],
   Alignment: ['targetCode', 'targetDescription', 'targetFramework', 'targetName', 'targetType', 'targetUrl'],
+  IdentifierEntry: ['identifier', 'identifierType'],
   Profile: [
     'additionalName', 'address', 'dateOfBirth', 'email', 'familyName', 'familyNamePrefix',
     'givenName', 'honorificPrefix', 'honorificSuffix', 'official', 'otherIdentifier', 'parentOrg',
@@ -67,6 +68,9 @@ describe('Open Badges 3.0 context', () => {
       const { achievement } = subject
       assertTermsDefined(achievement, 'Achievement', `${at}.achievement`)
       if (achievement.creator) assertTermsDefined(achievement.creator, 'Profile', `${at}.achievement.creator`)
+      for (const [j, entry] of (achievement.creator?.otherIdentifier ?? []).entries()) {
+        assertTermsDefined(entry, 'IdentifierEntry', `${at}.achievement.creator.otherIdentifier[${j}]`)
+      }
       for (const [j, a] of (achievement.alignment ?? []).entries()) {
         assertTermsDefined(a, 'Alignment', `${at}.achievement.alignment[${j}]`)
       }

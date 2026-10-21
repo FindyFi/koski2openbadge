@@ -243,10 +243,13 @@ function compact(value) {
 
 function orgProfile(org, pick) {
   if (!org) return undefined
+  const schoolNumber = nonEmpty(org.oppilaitosnumero?.koodiarvo)
   return {
     id: nonEmpty(org.oid) ? `urn:oid:${nonEmpty(org.oid)}` : hashId(['org', canonicalName(org.nimi)]),
     type: ['Profile'],
     name: pick(org.nimi),
+    // Statistics Finland's school number, when Koski gives one.
+    otherIdentifier: schoolNumber ? [{ type: ['IdentifierEntry'], identifier: schoolNumber, identifierType: 'identifier' }] : undefined,
   }
 }
 
