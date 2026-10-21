@@ -93,6 +93,9 @@ Options:
 
 ### Student status
 
+How the status is deduced from Koski data, condition by condition and with examples, is explained in Finnish in
+[docs/opiskelijatodiste.md](docs/opiskelijatodiste.md).
+
 A study right the person is enrolled in on `asOf` gives one more item, `{ credentialSubject, validUntil }`:
 
 - `achievement.achievementType` is `ext:StudentStatus` (Open Badges 3.0 allows extension values with `ext:`), and the
