@@ -110,8 +110,6 @@ Todiste on voimassa päättymispäivän loppuun Suomen aikaa (klo 23.59.59).
 ## Mitä todisteeseen tulee
 
 Todiste on Open Badges 3.0 -muotoinen (`achievementType: "ext:StudentStatus"`, tulos `status: "Enrolled"`).
-Opintotodiste-palvelu lähettää sen lompakkoon myös omana tyyppinään (SD-JWT VC "Opiskelijatodiste", ks.
-[openbadge-vct](https://github.com/FindyFi/openbadge-vct)). Sisältö on molemmissa sama:
 
 | Sisältö | Mistä |
 |---|---|
@@ -171,11 +169,13 @@ Kuvitteellisia tapauksia, tarkastelupäivä 20.10.2026:
 
 ## Rajoitukset
 
-- **Tiedot ovat niin ajantasaisia kuin Koski.** Oppilaitokset kirjaavat tiedot Koskeen, ja kirjauksissa voi olla
+- **Tietojen ajantasaisuus vastaa Koski-rekisterin tietoja.** Oppilaitokset kirjaavat tiedot Koskeen, ja kirjauksissa voi olla
   viivettä. Jos tieto on väärin, sen voi korjata vain oppilaitos.
-- **Todistetta ei peruuteta.** Opiskelijakortin tapaan todiste on voimassa päättymispäivään asti, vaikka henkilö
+- **Todistetta ei peruta.** Opiskelijakortin tapaan todiste on voimassa päättymispäivään asti, vaikka henkilö
   lopettaisi opintonsa sitä ennen. "Tilanne päivältä" kertoo, minkä päivän tilanteesta todiste on.
 - **Opintojen normiaikaa ei käytetä.** Jos arvioitua päättymispäivää ei ole, voimassaoloa ei arvata tutkinnon
   laajuudesta.
-- **Henkilöllisyyttä ei tarkasteta.** Todiste kertoo, mitä Koskessa lukee siitä henkilöstä, jonka tiedot jaettiin.
-  Tarkastaja voi verrata todisteen nimeä henkilöllisyystodistukseen tai henkilötunnistetietoihin (PID).
+- **Henkilöllisyyttä ei tarkasteta.** Todiste kertoo, mitä Koskessa lukee henkilöstä, jonka tiedot jaettiin.
+  Opiskelijatodisteessa ei ole henkilön kuvaa eikä sen hallussapitoa voi pitää todisteena haltijan henkilöllisyydestä.
+  Tarkastaja voi verrata todisteen nimeä henkilöllisyystodistukseen tai digitaalisesta lompakosta saataviin henkilön
+  tunnistetietoihin (PID).
